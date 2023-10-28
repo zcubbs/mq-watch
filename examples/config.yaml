@@ -1,0 +1,12 @@
+mqtt:
+  broker: "mqtt://127.0.0.1:1883"
+  topic: "my_topic"
+  client_id: "my_client_id"
+
+database:
+  dialect: "sqlite"
+  datasource: "mq-watch.db"
+  auto_migrate: true
+
+server:
+  port: 8000

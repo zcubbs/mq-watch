@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MQ Watcher</title>
+</head>
+<body>
+
+<h1>Message Counter</h1>
+
+<form id="queryForm">
+  <label for="tenantId">Tenant ID:</label>
+  <input type="text" id="tenantId" name="tenantId"><br><br>
+
+  <label for="startDate">Start Date:</label>
+  <input type="datetime-local" id="startDate" name="startDate"><br><br>
+
+  <label for="endDate">End Date:</label>
+  <input type="datetime-local" id="endDate" name="endDate"><br><br>
+
+  <input type="submit" value="Get Message Counts">
+</form>
+
+<div id="result"></div>
+
+<script src="web/app.js"></script>
+
+</body>
+</html>

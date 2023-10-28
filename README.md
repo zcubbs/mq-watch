@@ -1,6 +1,6 @@
 # MQ Watch
 
-`mq-watch` is a message watcher for MQTT brokers.
+`mq-watch` is a topic subscriber for MQTT brokers.
 
 ## Installation
 

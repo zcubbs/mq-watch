@@ -15,18 +15,18 @@ tasks:
 
   build:windows:
     cmds:
-      - go env -w GOOS=windows GOARCH=amd64
-      - go build -o bin/mq-watch.exe ./main.go
+      - go env -w CGO_ENABLED=1 GOOS=windows GOARCH=amd64
+      - go build -o bin/mq-watch.exe ./cmd/server/main.go
 
   build:darwin:
     cmds:
-      - go env -w GOOS=darwin GOARCH=amd64
-      - go build -o bin/mq-watch ./main.go
+      - go env -w CGO_ENABLED=1 GOOS=darwin GOARCH=amd64
+      - go build -o bin/mq-watch ./cmd/server/main.go
 
   build:linux:
     cmds:
-      - go env -w GOOS=linux GOARCH=amd64
-      - go build -o bin/mq-watch ./main.go
+      - go env -w CGO_ENABLED=1 GOOS=linux GOARCH=amd64
+      - go build -o bin/mq-watch ./cmd/server/main.go
 
   run:
     cmds:
@@ -63,30 +63,20 @@ tasks:
     cmds:
       - go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-  container:up:
+  containers:up:
     cmds:
-      - task: container:up:mosquitto
-      - task: container:up:influxdb
+      - task: containers:up:mosquitto
 
   containers:up:mosquitto:
     cmds:
-      - docker run -d --name mosquitto -p 1883:1883 -p 9001:9001 eclipse-mosquitto
-
-  containers:up:influxdb:
-    cmds:
-      - docker run -d --name influxdb -p 8086:8086 influxdb
+      - docker run -d -v $(pwd)/tests/mosquitto.conf:/mosquitto/config/mosquitto.conf -p 1883:1883 --name mosquitto eclipse-mosquitto
 
   containers:down:
     cmds:
-      - docker stop mosquitto influxdb
-      - docker rm mosquitto influxdb
+      - docker stop mosquitto
+      - docker rm mosquitto
 
   containers:down:mosquitto:
     cmds:
       - docker stop mosquitto
       - docker rm mosquitto
-
-  containers:down:influxdb:
-    cmds:
-      - docker stop influxdb
-      - docker rm influxdb
