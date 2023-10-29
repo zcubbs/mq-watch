@@ -6,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	"github.com/gofiber/template/html/v2"
 	"github.com/zcubbs/mq-watch/cmd/server/api"
 	"github.com/zcubbs/mq-watch/cmd/server/config"
 	"github.com/zcubbs/mq-watch/cmd/server/db"
@@ -20,8 +22,11 @@ var (
 	configPath = flag.String("config", ".", "Path to the configuration file")
 )
 
-//go:embed web/index.html web/app.js
-var content embed.FS
+//go:embed web/views
+var viewFiles embed.FS
+
+//go:embed web/assets
+var staticFiles embed.FS
 
 func main() {
 	flag.Parse()
@@ -51,44 +56,51 @@ func main() {
 
 	defer mqc.Disconnect(250)
 
-	// Setup and run the HTTP server
-	r := gin.Default()
-	r.GET("/api/messages", func(c *gin.Context) {
-		api.MessageHandler(conn, c)
+	// init template engine
+	engine := html.NewFileSystem(http.FS(viewFiles), ".html")
+	engine.Engine.Directory = "web/views"
+	engine.Reload(false)
+
+	// init server
+	app := fiber.New(fiber.Config{
+		Views:                 engine,
+		ViewsLayout:           "layouts/main",
+		DisableStartupMessage: true,
 	})
 
-	// Serve the UI files
-	// Serve the static files
-	r.GET("/web/*filepath", func(c *gin.Context) {
-		filepath := c.Param("filepath")
-		data, err := content.ReadFile("web" + filepath)
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-		c.Data(http.StatusOK, "text/plain", data)
+	app.Use("/assets", filesystem.New(
+		filesystem.Config{
+			Root:       http.FS(staticFiles),
+			PathPrefix: "web/assets",
+			Browse:     false,
+		},
+	))
+
+	// API endpoint
+	app.Get("/api/messages", func(c *fiber.Ctx) error {
+		// You might need to adjust this part based on the api.MessageHandler function
+		return api.MessageHandler(conn, c)
 	})
 
-	// Serve index.html at the root
-	r.GET("/", func(c *gin.Context) {
-		data, err := content.ReadFile("web/index.html")
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-		c.Data(http.StatusOK, "text/html", data)
+	// serve index
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"Title": "MQ Watch",
+		})
 	})
 
-	err = r.Run(fmt.Sprintf(":%d", cfg.Server.Port))
+	// Run the server
+	err = app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
 	if err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
 }
 
 type MessagePayload struct {
-	Device string `json:"device"`
-	Tenant string `json:"tenant"`
-	Data   string `json:"data"`
+	Device    string `json:"device"`
+	Tenant    string `json:"tenant"`
+	CreatedAt string `json:"created_at"`
+	Data      string `json:"data"`
 }
 
 func messageHandler(conn *gorm.DB, msg mqtt.Message) {
@@ -98,5 +110,5 @@ func messageHandler(conn *gorm.DB, msg mqtt.Message) {
 		return
 	}
 
-	db.SaveMessage(conn, payload.Tenant, 1)
+	db.SaveMessage(conn, payload.Tenant, 1, payload.CreatedAt)
 }

@@ -37,7 +37,3 @@ func initSqlite(cfg config.DatabaseConfiguration) (*gorm.DB, error) {
 
 	return db, nil
 }
-
-func SaveMessage(db *gorm.DB, tenant string, count int) {
-	db.Create(&models.MessageCount{Tenant: tenant, Count: count})
-}

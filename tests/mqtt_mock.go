@@ -37,5 +37,11 @@ func generatePayload() string {
 	tenant := fmt.Sprintf("tenant%d", rand.Intn(10))
 	data := fmt.Sprintf("data%d", rand.Intn(1000))
 
-	return fmt.Sprintf(`{"device": "%s", "tenant": "%s", "data": "%s"}`, device, tenant, data)
+	// Optional datetime field (can be enabled/disabled based on testing needs)
+	var datetimeField string
+	// Random date within last 30 days
+	datetime := time.Now().Add(time.Duration(-1*rand.Intn(30*24)) * time.Hour)
+	datetimeField = fmt.Sprintf(`, "datetime": "%s"`, datetime.Format(time.RFC3339))
+
+	return fmt.Sprintf(`{"device": "%s", "tenant": "%s", "created_at": "%s", "data": "%s"%s}`, device, tenant, datetime.Format(time.RFC3339), data, datetimeField)
 }

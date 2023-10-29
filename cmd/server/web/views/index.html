@@ -1,0 +1,201 @@
+<div class="container">
+  <h1>MQ Watch</h1>
+
+  <form id="queryForm">
+    <div class="input-row">
+      <div class="input-group">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="start_date" required>
+      </div>
+
+      <div class="input-group">
+        <label for="startTime">Start Time:</label>
+        <input type="time" id="startTime" name="start_time" required>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="end_date" required>
+      </div>
+
+      <div class="input-group">
+        <label for="endTime">End Time:</label>
+        <input type="time" id="endTime" name="end_time" required>
+      </div>
+    </div>
+
+    <button type="button" id="queryBtn">Query Messages</button>
+  </form>
+
+  <div id="results">
+    <p><strong>Total Messages:</strong> <span id="totalMessages">0</span></p>
+    <p id="messagesPerTenant"><strong>Messages per Tenant:</strong> <span id="tenantMessages">0</span></p>
+  </div>
+
+  <div>
+    <canvas id="lineChart"></canvas>
+  </div>
+  <div id="tableContainer">
+    <table id="dataTable">
+      <thead>
+      <tr>
+        <th>Date</th>
+        <!-- Tenant headers will be populated dynamically -->
+      </tr>
+      </thead>
+      <tbody>
+      <!-- Data rows will be populated dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  let myChart;
+  document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date();
+    const lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+    document.getElementById("endDate").value = today.toISOString().substr(0, 10);
+    document.getElementById("endTime").value = today.toTimeString().substr(0, 5);
+    document.getElementById("startDate").value = lastWeek.toISOString().substr(0, 10);
+    document.getElementById("startTime").value = "00:00";
+
+    const queryBtn = document.getElementById("queryBtn");
+    const resultsDiv = document.getElementById("results");
+    const totalMessagesSpan = document.getElementById("totalMessages");
+    const tenantMessagesSpan = document.getElementById("tenantMessages");
+    const messagesPerTenant = document.getElementById("messagesPerTenant");
+
+    queryBtn.addEventListener("click", function() {
+      const startDate = document.getElementById("startDate").value;
+      const startTime = document.getElementById("startTime").value;
+      const endDate = document.getElementById("endDate").value;
+      const endTime = document.getElementById("endTime").value;
+
+      // Construct the URL for querying
+      let startDateTime = `${startDate}T${startTime}:00Z`;
+      let endDateTime = `${endDate}T${endTime}:00Z`;
+      let queryURL = `/api/messages?start_datetime=${startDateTime}&end_datetime=${endDateTime}`;
+
+      fetch(queryURL)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          totalMessagesSpan.textContent = data.total_messages;
+
+          // If tenant specific data is present, update the tenant message count
+          if (data.messages_per_tenant !== undefined) {
+            tenantMessagesSpan.textContent = data.messages_per_tenant;
+            messagesPerTenant.style.display = "block";
+          } else {
+            messagesPerTenant.style.display = "none";
+          }
+
+          // Populate the chart (assuming you have a canvas with id 'lineChart' for this to work)
+          let dates = Object.keys(data.daily_data);
+          let tenants = [...new Set([].concat(...dates.map(date => Object.keys(data.daily_data[date]))))];
+          let datasets = tenants.map(tenant => {
+            let dataForTenant = dates.map(date => data.daily_data[date][tenant] || 0);
+            return {
+              label: tenant,
+              data: dataForTenant,
+              fill: false,
+              borderColor: randomColor(),
+              tension: 0.1
+            };
+          });
+          var ctx = document.getElementById('lineChart').getContext('2d');
+
+          let chartOptions = {
+            scales: {
+              xAxes: [{
+                ticks: {
+                  fontColor: 'white' // sets x-axis label color
+                },
+                gridLines: {
+                  color: 'rgba(255, 255, 255, 0.1)', // sets x-axis grid line color
+                }
+              }],
+              yAxes: [{
+                ticks: {
+                  fontColor: 'white', // sets y-axis label color
+                  beginAtZero: true,
+                  precision: 0, // to ensure it shows whole numbers
+                  stepSize: 1 // ensures each tick increases by 1
+                },
+                gridLines: {
+                  color: 'rgba(255, 255, 255, 0.1)', // sets y-axis grid line color
+                }
+              }]
+            },
+            legend: {
+              labels: {
+                fontColor: 'white' // sets legend label color
+              }
+            }
+          };
+          if (myChart) {
+            myChart.destroy(); // Destroy the existing chart
+          }
+          myChart = new Chart(ctx, {
+            type: 'line',
+            options: chartOptions,
+            data: {
+              labels: dates,
+              datasets: datasets
+            }
+          });
+
+          // Populate the table
+          const dataTable = document.getElementById("dataTable");
+          const tbody = dataTable.querySelector("tbody");
+          tbody.innerHTML = ''; // Clear existing rows
+
+          // Add tenant headers dynamically
+          const thead = dataTable.querySelector("thead tr");
+          tenants.forEach(tenant => {
+            const th = document.createElement("th");
+            th.textContent = tenant;
+            thead.appendChild(th);
+          });
+
+          // Add data rows
+          dates.forEach(date => {
+            const tr = document.createElement("tr");
+            const tdDate = document.createElement("td");
+            tdDate.textContent = date;
+            tr.appendChild(tdDate);
+
+            tenants.forEach(tenant => {
+              const td = document.createElement("td");
+              td.textContent = data.daily_data[date][tenant] || 0;
+              tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+          });
+
+        })
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          resultsDiv.textContent = "Error fetching data.";
+        });
+    });
+
+    function randomColor() {
+      let r = Math.floor(Math.random() * 255);
+      let g = Math.floor(Math.random() * 255);
+      let b = Math.floor(Math.random() * 255);
+      return `rgba(${r}, ${g}, ${b}, 1)`;
+    }
+
+  });
+</script>
+
