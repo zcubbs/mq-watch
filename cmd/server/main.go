@@ -1,32 +1,29 @@
 package main
 
 import (
-	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/filesystem"
-	"github.com/gofiber/template/html/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/zcubbs/mq-watch/cmd/server/api"
 	"github.com/zcubbs/mq-watch/cmd/server/config"
 	"github.com/zcubbs/mq-watch/cmd/server/db"
 	"github.com/zcubbs/mq-watch/cmd/server/mqttclient"
 	"gorm.io/gorm"
 	"log"
-	"net/http"
 )
 
 var (
 	configPath = flag.String("config", ".", "Path to the configuration file")
 )
 
-//go:embed web/views
-var viewFiles embed.FS
-
-//go:embed web/assets
-var staticFiles embed.FS
+////go:embed web/views
+//var viewFiles embed.FS
+//
+////go:embed web/assets
+//var staticFiles embed.FS
 
 func main() {
 	flag.Parse()
@@ -57,24 +54,29 @@ func main() {
 	defer mqc.Disconnect(250)
 
 	// init template engine
-	engine := html.NewFileSystem(http.FS(viewFiles), ".html")
-	engine.Engine.Directory = "web/views"
-	engine.Reload(false)
+	//engine := html.NewFileSystem(http.FS(viewFiles), ".html")
+	//engine.Engine.Directory = "web/views"
+	//engine.Reload(false)
 
 	// init server
 	app := fiber.New(fiber.Config{
-		Views:                 engine,
-		ViewsLayout:           "layouts/main",
+		//Views:                 engine,
+		//ViewsLayout:           "layouts/main",
 		DisableStartupMessage: true,
 	})
 
-	app.Use("/assets", filesystem.New(
-		filesystem.Config{
-			Root:       http.FS(staticFiles),
-			PathPrefix: "web/assets",
-			Browse:     false,
-		},
-	))
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
+
+	//app.Use("/assets", filesystem.New(
+	//	filesystem.Config{
+	//		Root:       http.FS(staticFiles),
+	//		PathPrefix: "web/assets",
+	//		Browse:     false,
+	//	},
+	//))
 
 	// API endpoint
 	app.Get("/api/messages", func(c *fiber.Ctx) error {
@@ -82,12 +84,12 @@ func main() {
 		return api.MessageHandler(conn, c)
 	})
 
-	// serve index
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Render("index", fiber.Map{
-			"Title": "MQ Watch",
-		})
-	})
+	//// serve index
+	//app.Get("/", func(c *fiber.Ctx) error {
+	//	return c.Render("index", fiber.Map{
+	//		"Title": "MQ Watch",
+	//	})
+	//})
 
 	// Run the server
 	err = app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
