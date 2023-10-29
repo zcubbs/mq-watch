@@ -8,13 +8,40 @@
   <base href="/">
   <link href="assets/styles.css" type="text/css" rel="stylesheet">
   <script src="https://unpkg.com/phosphor-icons"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body>
-{{embed}}
+  <button id="themeToggle">Toggle Theme</button>
+  <div class="bg-white text-black dark-mode:bg-gray-800 dark-mode:text-white">
+    {{embed}}
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const currentTheme = localStorage.getItem("theme");
+
+    // Set the initial theme on page load
+    if (currentTheme === "dark") {
+      document.documentElement.classList.add("dark-mode");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+    }
+
+    // Toggle the theme and save it in local storage
+    themeToggle.addEventListener("click", () => {
+      if (document.documentElement.classList.contains("dark-mode")) {
+        document.documentElement.classList.remove("dark-mode");
+        localStorage.setItem("theme", "light");
+      } else {
+        document.documentElement.classList.add("dark-mode");
+        localStorage.setItem("theme", "dark");
+      }
+    });
+
+  </script>
 </body>
 
 </html>

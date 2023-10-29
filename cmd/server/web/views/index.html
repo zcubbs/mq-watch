@@ -1,56 +1,56 @@
-<div class="container">
-  <h1>MQ Watch</h1>
+<div class="container mx-auto p-4">
+  <h1 class="text-4xl font-bold mb-4">MQ Watch</h1>
 
-  <form id="queryForm">
-    <div class="input-row">
-      <div class="input-group">
-        <label for="startDate">Start Date:</label>
-        <input type="date" id="startDate" name="start_date" required>
+  <form id="queryForm" class="mb-4">
+    <div class="flex space-x-4 mb-4">
+      <div class="flex flex-col">
+        <label for="startDate" class="mb-2">Start Date:</label>
+        <input type="date" id="startDate" name="start_date" required class="border p-2 rounded">
       </div>
 
-      <div class="input-group">
-        <label for="startTime">Start Time:</label>
-        <input type="time" id="startTime" name="start_time" required>
-      </div>
-    </div>
-
-    <div class="input-row">
-      <div class="input-group">
-        <label for="endDate">End Date:</label>
-        <input type="date" id="endDate" name="end_date" required>
-      </div>
-
-      <div class="input-group">
-        <label for="endTime">End Time:</label>
-        <input type="time" id="endTime" name="end_time" required>
+      <div class="flex flex-col">
+        <label for="startTime" class="mb-2">Start Time:</label>
+        <input type="time" id="startTime" name="start_time" required class="border p-2 rounded">
       </div>
     </div>
 
-    <button type="button" id="queryBtn">Query Messages</button>
+    <div class="flex space-x-4 mb-4">
+      <div class="flex flex-col">
+        <label for="endDate" class="mb-2">End Date:</label>
+        <input type="date" id="endDate" name="end_date" required class="border p-2 rounded">
+      </div>
+
+      <div class="flex flex-col">
+        <label for="endTime" class="mb-2">End Time:</label>
+        <input type="time" id="endTime" name="end_time" required class="border p-2 rounded">
+      </div>
+    </div>
+
+    <button type="button" id="queryBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Query Messages</button>
   </form>
 
-  <div id="results">
-    <p><strong>Total Messages:</strong> <span id="totalMessages">0</span></p>
-    <p id="messagesPerTenant"><strong>Messages per Tenant:</strong> <span id="tenantMessages">0</span></p>
+  <div id="results" class="mb-4">
+    <p class="text-xl font-semibold"><strong>Total Messages:</strong> <span id="totalMessages"></span></p>
   </div>
 
-  <div>
+  <div class="mb-4">
+    <button id="toggleTenants" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4">Toggle All Tenants</button>
     <canvas id="lineChart"></canvas>
   </div>
-  <div id="tableContainer">
-    <table id="dataTable">
+
+  <div id="tableContainer" class="overflow-x-auto">
+    <table id="dataTable" class="min-w-full bg-white border border-gray-300">
       <thead>
-      <tr>
-        <th>Date</th>
-        <!-- Tenant headers will be populated dynamically -->
+      <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+        <th class="py-3 px-6 text-left">Tenant</th>
+        <th class="py-3 px-6 text-left">Total Messages</th>
       </tr>
       </thead>
-      <tbody>
+      <tbody class="text-gray-600 text-sm font-light">
       <!-- Data rows will be populated dynamically -->
       </tbody>
     </table>
   </div>
-
 </div>
 
 <script>
@@ -89,17 +89,10 @@
         })
         .then(data => {
           totalMessagesSpan.textContent = data.total_messages;
-
-          // If tenant specific data is present, update the tenant message count
-          if (data.messages_per_tenant !== undefined) {
-            tenantMessagesSpan.textContent = data.messages_per_tenant;
-            messagesPerTenant.style.display = "block";
-          } else {
-            messagesPerTenant.style.display = "none";
-          }
-
           // Populate the chart (assuming you have a canvas with id 'lineChart' for this to work)
           let dates = Object.keys(data.daily_data);
+          let filledDailyData = fillDateGaps(dates, data.daily_data);
+          dates = Object.keys(filledDailyData);  // Update dates to include all in range
           let tenants = [...new Set([].concat(...dates.map(date => Object.keys(data.daily_data[date]))))];
           let datasets = tenants.map(tenant => {
             let dataForTenant = dates.map(date => data.daily_data[date][tenant] || 0);
@@ -115,25 +108,21 @@
 
           let chartOptions = {
             scales: {
-              xAxes: [{
+              y: {
+                beginAtZero: true,
                 ticks: {
-                  fontColor: 'white' // sets x-axis label color
+                  fontColor: 'white',
+                  callback: function(value) {
+                    if (Math.floor(value) === value) {
+                      return value;
+                    }
+                  },
+                  stepSize: 1
                 },
-                gridLines: {
-                  color: 'rgba(255, 255, 255, 0.1)', // sets x-axis grid line color
+                grid: {
+                  borderColor: 'rgba(255, 255, 255, 0.1)'
                 }
-              }],
-              yAxes: [{
-                ticks: {
-                  fontColor: 'white', // sets y-axis label color
-                  beginAtZero: true,
-                  precision: 0, // to ensure it shows whole numbers
-                  stepSize: 1 // ensures each tick increases by 1
-                },
-                gridLines: {
-                  color: 'rgba(255, 255, 255, 0.1)', // sets y-axis grid line color
-                }
-              }]
+              }
             },
             legend: {
               labels: {
@@ -153,40 +142,54 @@
             }
           });
 
-          // Populate the table
+          // Calculate totals per tenant for the selected period
+          let tenantTotals = {};
+
+          dates.forEach(date => {
+            tenants.forEach(tenant => {
+              if (!tenantTotals[tenant]) {
+                tenantTotals[tenant] = 0;
+              }
+              tenantTotals[tenant] += data.daily_data[date][tenant] || 0;
+            });
+          });
+
+          // Populate the table with tenant totals
           const dataTable = document.getElementById("dataTable");
           const tbody = dataTable.querySelector("tbody");
           tbody.innerHTML = ''; // Clear existing rows
 
-          // Add tenant headers dynamically
-          const thead = dataTable.querySelector("thead tr");
-          tenants.forEach(tenant => {
-            const th = document.createElement("th");
-            th.textContent = tenant;
-            thead.appendChild(th);
-          });
-
-          // Add data rows
-          dates.forEach(date => {
+          for (let tenant in tenantTotals) {
             const tr = document.createElement("tr");
-            const tdDate = document.createElement("td");
-            tdDate.textContent = date;
-            tr.appendChild(tdDate);
 
-            tenants.forEach(tenant => {
-              const td = document.createElement("td");
-              td.textContent = data.daily_data[date][tenant] || 0;
-              tr.appendChild(td);
-            });
+            const tdTenant = document.createElement("td");
+            tdTenant.textContent = tenant;
+            tr.appendChild(tdTenant);
+
+            const tdTotal = document.createElement("td");
+            tdTotal.textContent = tenantTotals[tenant];
+            tr.appendChild(tdTotal);
 
             tbody.appendChild(tr);
-          });
+          }
 
         })
         .catch(error => {
           console.error("Error fetching data:", error);
           resultsDiv.textContent = "Error fetching data.";
         });
+
+      let allVisible = true;  // This flag tracks the state of tenant visibility.
+
+      document.getElementById("toggleTenants").addEventListener("click", function() {
+        if (myChart) {
+          myChart.data.datasets.forEach(dataset => {
+            dataset.hidden = allVisible;  // If all are visible, hide them and vice-versa.
+          });
+          allVisible = !allVisible;  // Toggle the visibility flag.
+          myChart.update();  // Update the chart to reflect the changes.
+        }
+      });
     });
 
     function randomColor() {
@@ -194,6 +197,20 @@
       let g = Math.floor(Math.random() * 255);
       let b = Math.floor(Math.random() * 255);
       return `rgba(${r}, ${g}, ${b}, 1)`;
+    }
+
+    function fillDateGaps(dates, daily_data) {
+      let filledData = {...daily_data};
+      let startDate = new Date(dates[0]);
+      let endDate = new Date(dates[dates.length - 1]);
+
+      for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+        let dateString = d.toISOString().split('T')[0];
+        if (!filledData[dateString]) {
+          filledData[dateString] = {};
+        }
+      }
+      return filledData;
     }
 
   });
