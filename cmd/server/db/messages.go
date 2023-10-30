@@ -11,7 +11,7 @@ func GetTotalMessages(db *gorm.DB, startDate time.Time, endDate time.Time) (int6
 	var total int64
 	err := db.Model(&models.MessageCount{}).
 		Where("created_at BETWEEN ? AND ?", startDate, endDate).
-		Select("SUM(count) as total").
+		Select("COALESCE(SUM(count), 0) as total").
 		Scan(&total).Error
 
 	return total, err
@@ -22,7 +22,7 @@ func GetMessagesPerTenant(db *gorm.DB, tenant string, startDate time.Time, endDa
 	var total int64
 	err := db.Model(&models.MessageCount{}).
 		Where("tenant = ? AND created_at BETWEEN ? AND ?", tenant, startDate, endDate).
-		Select("SUM(count) as total").
+		Select("COALESCE(SUM(count), 0) as total").
 		Scan(&total).Error
 
 	return total, err

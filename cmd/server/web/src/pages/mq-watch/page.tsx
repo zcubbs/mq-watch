@@ -1,24 +1,15 @@
-import QueryForm from "@/pages/mq-watch/components/query-form.tsx";
-import Graph from "@/pages/mq-watch/components/graph.tsx";
-import {useFetchData} from "@/pages/mq-watch/api.ts";
+import MessagesLineChart from "@/pages/mq-watch/components/chart-v2.tsx";
 
-function QueryPage() {
-  const { data, error, isLoading } = useFetchData();
-
-  if (isLoading) {
-    return <span>Loading...</span>;
-  }
-
-  if (error) {
-    return <span>Error fetching data.</span>;
-  }
-
+function MQWatchPage() {
   return (
     <>
-      <QueryForm />
-      <Graph data={data} />
+      {/*<QueryForm />*/}
+      <MessagesLineChart />
+      {/*<MessagesChart tenantMessages={chartDataMessages} />*/}
+      {/*<Graph data={fetchData} />*/}
+      {/*<MessageStatsList data={statData}/>*/}
     </>
   );
 }
 
-export default QueryPage;
+export default MQWatchPage;

@@ -1,18 +1,10 @@
 import React from 'react';
+import {Card, Metric, Text} from "@tremor/react";
 
 interface MessageStatProps {
   tenant: string;
   totalMessages: number;
 }
-
-const MessageStat: React.FC<MessageStatProps> = ({ tenant, totalMessages }) => {
-  return (
-    <div className="message-stat">
-      <span className="tenant">{tenant}</span>
-      <span className="total-messages">{totalMessages}</span>
-    </div>
-  );
-};
 
 interface MessageStatsListProps {
   data: MessageStatProps[];
@@ -20,11 +12,14 @@ interface MessageStatsListProps {
 
 const MessageStatsList: React.FC<MessageStatsListProps> = ({ data }) => {
   return (
-    <div className="message-stats-list">
-      {data.map((stat, index) => (
-        <MessageStat key={index} {...stat} />
+    <>
+      {data?.map((stat) => (
+        <Card key={stat.tenant} className="max-w-xs mx-auto">
+          <Text>{stat.tenant}</Text>
+          <Metric>{stat.totalMessages}</Metric>
+        </Card>
       ))}
-    </div>
+    </>
   );
 };
 
