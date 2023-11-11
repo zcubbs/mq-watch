@@ -88,6 +88,9 @@ func main() {
 	app.Get("/api/top-tenants", func(c *fiber.Ctx) error {
 		return api.GetTopTenantsHandler(conn, c)
 	})
+	app.Get("/api/message-stats", func(c *fiber.Ctx) error {
+		return api.GetMessageStatsHandler(conn, c)
+	})
 
 	// Run the server
 	log.Info("Starting server", "port", cfg.Server.Port)

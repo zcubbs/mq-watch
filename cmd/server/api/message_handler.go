@@ -114,3 +114,39 @@ func GetTopTenantsHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	// Return the top tenants in JSON format
 	return c.Status(http.StatusOK).JSON(topTenants)
 }
+
+// GetMessageStatsHandler retrieves the total messages count for a date range and optional tenant filter.
+func GetMessageStatsHandler(conn *gorm.DB, c *fiber.Ctx) error {
+	// Parsing dates from the request parameters
+	startDateStr := c.Query("start_date")
+	endDateStr := c.Query("end_date")
+
+	// Optional tenant filter
+	tenant := c.Query("tenant")
+
+	// Error handling for date parsing
+	startDate, err := time.Parse(time.RFC3339, startDateStr)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid start_date format"})
+	}
+
+	endDate, err := time.Parse(time.RFC3339, endDateStr)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid end_date format"})
+	}
+
+	var totalMessages int64
+	if tenant != "" {
+		// Fetch total messages for a specific tenant within the date range
+		totalMessages, err = db.GetMessagesPerTenant(conn, tenant, startDate, endDate)
+	} else {
+		// Fetch total messages across all tenants within the date range
+		totalMessages, err = db.GetTotalMessages(conn, startDate, endDate)
+	}
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{"total_messages": totalMessages})
+}
