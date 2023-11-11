@@ -1,57 +1,46 @@
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { useState, useEffect, FC } from 'react';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { fetchTotalMessagesPerDay } from '../api';
 
-const data = [
-  {
-    name: "Jan",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Feb",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Mar",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Apr",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "May",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Jun",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Jul",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Aug",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Sep",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Oct",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Nov",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Dec",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-]
+interface MessagePerTenantListProps {
+  startDate?: Date; // Make these optional if they can be not provided
+  endDate?: Date;
+}
 
-export function MessagePerTenantList() {
+interface ChartData {
+  name: string;
+  total: number;
+}
+
+export const MessagePerTenantList: FC<MessagePerTenantListProps> = ({ startDate, endDate }) => {
+  const [data, setData] = useState<ChartData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Provide default dates if not supplied
+    const defaultStartDate = startDate ?? new Date();
+    const defaultEndDate = endDate ?? new Date();
+
+    // Convert dates to RFC3339 format or your preferred format
+    const formattedStartDate = defaultStartDate.toISOString();
+    const formattedEndDate = defaultEndDate.toISOString();
+
+    fetchTotalMessagesPerDay(formattedStartDate, formattedEndDate)
+      .then((fetchedData: ChartData[]) => {
+        setData(fetchedData);
+        setLoading(false);
+      })
+      .catch((err: Error) => {
+        setError(err.message);
+        setLoading(false);
+      });
+
+  }, [startDate, endDate]); // Dependencies should be the exact props
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <ResponsiveContainer width="100%" height={380}>
       <BarChart data={data}>
@@ -67,10 +56,25 @@ export function MessagePerTenantList() {
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${value}`}
+          tickFormatter={(value: number) => `${value}`}
+        />
+        <Tooltip
+          cursor={{ fill: 'transparent' }}
+          formatter={(value: number) => [`Total: ${value}`]}
+          labelFormatter={(name: string) => `Date: ${name}`}
+          contentStyle={{
+            backgroundColor: '#333', // Dark background
+            borderColor: '#777',     // Lighter border color
+            borderRadius: '4px',     // Rounded corners
+            color: '#fff'            // White text color
+          }}
+          itemStyle={{
+            color: '#fff'            // White text for items
+          }}
         />
         <Bar dataKey="total" fill="#adfa1d" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
-  )
-}
+
+  );
+};

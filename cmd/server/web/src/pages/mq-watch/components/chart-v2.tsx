@@ -1,138 +1,100 @@
-import React, {RefObject, useEffect, useRef, useState} from 'react';
-import {Chart, ChartData, ChartDataset, ChartOptions} from 'chart.js';
-import "chart.js/auto";
-// @ts-ignore
-import 'chartjs-adapter-moment';
-import {Line} from 'react-chartjs-2'
-import {fetchData} from "@/pages/mq-watch/api.ts";
-import {Button} from "@/components/ui/button.tsx";
+import React, { FC, useEffect, useState } from 'react';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  TooltipProps,
+} from 'recharts';
+import { fetchData } from "@/pages/mq-watch/api"; // Assuming this is the correct path
+import { formatDateToRFC3339, getRandomPastelColor } from "@/lib/utils"; // Assuming this is the correct path
 
-interface LineChartData extends ChartData {
-  labels: string[];
-  datasets: ChartDataset<"line", number[]>[];
+interface TenantData {
+  [tenant: string]: number;
 }
 
-const getRandomColor = (): string => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
-
-// Function to format date to RFC3339
-function formatDateToRFC3339(date: Date) {
-  function pad(value: number) {
-    return value < 10 ? `0${value}` : value;
-  }
-
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}Z`;
+interface DailyData {
+  [date: string]: TenantData;
 }
 
-// Define the options for the Line chart
-const options: ChartOptions<'line'> = {
-  scales: {
-    x: {
-      type: 'time',
-      time: {
-        parser: 'YYYY-MM-DD',
-        unit: 'day',
-        displayFormats: {
-          day: 'DD MMM'
-        },
-        tooltipFormat: 'DD MMM'
-      },
-      ticks: {
-        autoSkip: true,
-        maxTicksLimit: 10  // adjust to your preference
-      },
-      title: {
-        display: true,
-        text: 'Date',
-      },
-    },
-    y: {
-      title: {
-        display: true,
-        text: 'Messages',
-      },
-    },
-  },
+interface MessagesLineChartProps {
+  startDate: Date;
+  endDate: Date;
+}
+
+interface TenantCounts {
+  [tenant: string]: number;
+}
+
+interface RechartsLineChartData {
+  date: string;
+  counts: TenantCounts;
+}
+
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  payload?: {
+    color: string;
+    name: string;
+    value: number;
+  }[];
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="custom-tooltip" style={{
+        backgroundColor: '#222',
+        border: '1px solid #555',
+        padding: '5px',
+        borderRadius: '5px',
+        color: 'white'
+      }}>
+        <p className="label">{`Date: ${label}`}</p>
+        {payload.map((entry) => (
+          <p key={entry.name} style={{ color: entry.color }}>
+            {`${entry.name} : ${entry.value}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  return null;
 };
 
-
-const MessagesLineChart: React.FC = () => {
-  const [chartData, setChartData] = useState<LineChartData | null>(null);
-  const chartRef = useRef<RefObject<Chart> | null>(null);
+const MessagesLineChart: FC<MessagesLineChartProps> = ({ startDate, endDate }) => {
+  const [chartData, setChartData] = useState<RechartsLineChartData[]>([]);
 
   useEffect(() => {
-    const endDate = new Date();
-
-    // Calculate start date as 7 days ago at 00:00
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 60);
-    startDate.setHours(0, 0, 0, 0);
-
-    // Fetch data from API
     fetchData(formatDateToRFC3339(startDate), formatDateToRFC3339(endDate))
-      .then((data) => {
-        const dailyData = data.daily_data;
-
-        // Extracting unique tenants
-        let tenants: string[] = [];
-        Object.values(dailyData).forEach((day: any) => {
-          tenants = [...tenants, ...Object.keys(day)];
-        });
-        tenants = [...new Set(tenants)]; // Removing duplicates
-
-        // Extracting dates
-        const dates = Object.keys(dailyData);
-
-        // Creating datasets
-        const datasets = tenants.map((tenant) => {
-          return {
-            label: tenant,
-            data: dates.map((date) => dailyData[date][tenant] || 0), // Using 0 if no data for tenant on a date
-            fill: false,
-            borderColor: getRandomColor(),
-          };
+      .then((response: { daily_data: DailyData }) => {
+        const newData: RechartsLineChartData[] = Object.entries(response.daily_data).map(([date, tenantsData]) => {
+          return { date, counts: tenantsData };
         });
 
-        setChartData({
-          labels: dates,
-          datasets,
-        });
+        setChartData(newData);
       });
-  }, []);
+  }, [startDate, endDate]);
 
-  if (!chartData?.labels || chartData.labels.length === 0 || !chartData.datasets) {
+  if (!chartData.length) {
     return <div>Loading...</div>;
   }
 
-  const toggleLines = () => {
-    if (!chartRef.current) return;
-
-    // Toggle lines directly on the chart instance
-    (chartRef.current as any)?.data.datasets.forEach((dataset: ChartDataset<"line", number[]>) => {
-      dataset.hidden = !dataset.hidden;
-    });
-    (chartRef.current as any)?.update(); // Update the chart to reflect changes
-  };
-
   return (
-    <div>
-      <Button onClick={toggleLines} variant="ghost">
-        Toggle Lines
-      </Button>
-      <Line
-        height="220"
-        width="auto"
-        ref={chartRef as any}
-        data={chartData}
-        options={options}
-      />
-    </div>
+    <ResponsiveContainer width="100%" height={380}>
+      <LineChart data={chartData}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+        <XAxis dataKey="date" stroke="#ccc" />
+        <YAxis stroke="#ccc" />
+        <Tooltip content={<CustomTooltip />} />
+        {Object.keys(chartData[0].counts).map(key => (
+          <Line type="monotone" dataKey={`counts.${key}`} stroke={getRandomPastelColor()} key={key} dot={false} />
+        ))}
+      </LineChart>
+    </ResponsiveContainer>
   );
 };
 

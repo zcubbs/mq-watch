@@ -77,10 +77,13 @@ func main() {
 		},
 	))
 
-	// serve the api
+	// serve the api routes
 	app.Get("/api/messages", func(c *fiber.Ctx) error {
 		// You might need to adjust this part based on the api.MessageHandler function
 		return api.MessageHandler(conn, c)
+	})
+	app.Get("/api/total-messages-per-day", func(c *fiber.Ctx) error {
+		return api.TotalMessagesPerDayHandler(conn, c)
 	})
 
 	// Run the server

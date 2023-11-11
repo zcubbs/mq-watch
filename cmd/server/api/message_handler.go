@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -40,4 +41,50 @@ func MessageHandler(conn *gorm.DB, c *fiber.Ctx) error {
 		"total_messages": totalMessages,
 		"daily_data":     dailyMessagesPerTenant,
 	})
+}
+
+func TotalMessagesPerDayHandler(conn *gorm.DB, c *fiber.Ctx) error {
+	// Parsing dates from the request parameters
+	startDateStr := c.Query("start_date")
+	endDateStr := c.Query("end_date")
+
+	// Error handling for date parsing
+	startDate, err := time.Parse(time.RFC3339, startDateStr)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid start_date format"})
+	}
+
+	endDate, err := time.Parse(time.RFC3339, endDateStr)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid end_date format"})
+	}
+
+	// Using the function to get the data
+	messagesTotalPerDay, err := db.GetMessagesTotalPerDay(conn, startDate, endDate)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Transforming the map into a slice of the desired structure
+	type totalPerDay struct {
+		Name  string `json:"name"`
+		Total int64  `json:"total"`
+	}
+
+	var totals []totalPerDay
+	for date, count := range messagesTotalPerDay {
+		parsedDate, _ := time.Parse("2006-01-02", date)
+		formattedDate := parsedDate.Format("02 Jan") // Format as "DD MMM"
+		totals = append(totals, totalPerDay{Name: formattedDate, Total: count})
+	}
+
+	// Sorting the slice by date
+	sort.Slice(totals, func(i, j int) bool {
+		dateI, _ := time.Parse("02 Jan", totals[i].Name)
+		dateJ, _ := time.Parse("02 Jan", totals[j].Name)
+		return dateI.Before(dateJ)
+	})
+
+	// Returning the results in JSON format
+	return c.Status(http.StatusOK).JSON(totals)
 }

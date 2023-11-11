@@ -64,6 +64,33 @@ func GetDailyMessagesPerTenant(db *gorm.DB, startDate time.Time, endDate time.Ti
 	return data, nil
 }
 
+// GetMessagesTotalPerDay gets the sum of the count column per day between two dates
+func GetMessagesTotalPerDay(db *gorm.DB, startDate time.Time, endDate time.Time) (map[string]int64, error) {
+	type result struct {
+		Date  string
+		Count int64
+	}
+	var results []result
+
+	err := db.Model(&models.MessageCount{}).
+		Where("created_at BETWEEN ? AND ?", startDate, endDate).
+		Select("DATE(created_at) as date, SUM(count) as count").
+		Group("DATE(created_at)").
+		Order("DATE(created_at) ASC").
+		Find(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	data := make(map[string]int64)
+	for _, r := range results {
+		data[r.Date] = r.Count
+	}
+
+	return data, nil
+}
+
 func SaveMessage(db *gorm.DB, tenant string, count int, createDateIn string) {
 	var createDate time.Time
 	if createDateIn == "" {

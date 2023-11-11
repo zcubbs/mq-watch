@@ -16,3 +16,15 @@ export const fetchData = async (startDate: string, endDate: string) => {
   }
   return await response.json();
 };
+
+export const fetchTotalMessagesPerDay = async (startDate: string, endDate: string) => {
+  const formattedStartDate = formatDateToRFC3339(startDate);
+  const formattedEndDate = formatDateToRFC3339(endDate);
+
+  const response = await fetch(API_URL + `/api/total-messages-per-day?start_date=${formattedStartDate}&end_date=${formattedEndDate}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Network response was not ok");
+  }
+  return await response.json();
+};
