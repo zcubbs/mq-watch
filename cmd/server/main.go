@@ -46,8 +46,8 @@ func main() {
 	}
 
 	mqc, err := mqttclient.ConnectAndSubscribe(
-		cfg.MQTT.Broker,
-		cfg.MQTT.Topic,
+		cfg.MQTT,
+		cfg.Tenants,
 		func(client mqtt.Client, msg mqtt.Message) {
 			messageHandler(conn, msg)
 		},

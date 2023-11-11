@@ -5,6 +5,7 @@ import "chart.js/auto";
 import 'chartjs-adapter-moment';
 import {Line} from 'react-chartjs-2'
 import {fetchData} from "@/pages/mq-watch/api.ts";
+import {Button} from "@/components/ui/button.tsx";
 
 interface LineChartData extends ChartData {
   labels: string[];
@@ -121,9 +122,9 @@ const MessagesLineChart: React.FC = () => {
 
   return (
     <div>
-      {/*<button onClick={toggleLines}>*/}
-      {/*  Toggle Lines*/}
-      {/*</button>*/}
+      <Button onClick={toggleLines} variant="ghost">
+        Toggle Lines
+      </Button>
       <Line
         height="220"
         width="auto"

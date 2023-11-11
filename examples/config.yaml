@@ -1,7 +1,14 @@
 mqtt:
   broker: "mqtt://127.0.0.1:1883"
-  topic: "my_topic"
   client_id: "my_client_id"
+
+tenants:
+  - name: "tenant1"
+    topics:
+      - "tenant1/#"
+  - name: "tenant2"
+    topics:
+      - "tenant2/#"
 
 database:
   dialect: "sqlite"
