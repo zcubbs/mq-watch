@@ -4,6 +4,7 @@ import "chart.js/auto";
 // @ts-ignore
 import 'chartjs-adapter-moment';
 import { Line } from 'react-chartjs-2'
+import {fetchData} from "@/pages/mq-watch/api.ts";
 
 interface LineChartData extends ChartData {
   labels: string[];
@@ -69,11 +70,11 @@ const MessagesLineChart: React.FC = () => {
 
     // Calculate start date as 7 days ago at 00:00
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 7);
+    startDate.setDate(startDate.getDate() - 60);
     startDate.setHours(0, 0, 0, 0);
 
-    fetch(`http://localhost:8000/api/messages?start_datetime=${formatDateToRFC3339(startDate)}&end_datetime=${formatDateToRFC3339(endDate)}`)
-      .then((response) => response.json())
+    // Fetch data from API
+    fetchData(formatDateToRFC3339(startDate), formatDateToRFC3339(endDate))
       .then((data) => {
         const dailyData = data.daily_data;
 
@@ -120,10 +121,9 @@ const MessagesLineChart: React.FC = () => {
 
   return (
     <div>
-      <h2>Messages Count Per Tenant</h2>
-      <button onClick={toggleLines}>
-        Toggle Lines
-      </button>
+      {/*<button onClick={toggleLines}>*/}
+      {/*  Toggle Lines*/}
+      {/*</button>*/}
       <Line
         ref={chartRef as any}
         data={chartData}

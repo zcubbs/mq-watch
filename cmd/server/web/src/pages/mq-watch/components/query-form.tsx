@@ -34,27 +34,29 @@ export function DatePickerForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="range"
-          render={({field}) => (
-            <FormItem className="flex flex-col">
-              <FormControl>
-                <DatePickerWithRange
-                  className={cn(
-                    "w-[240px] pl-3 text-left font-normal",
-                    !field.value && "text-muted-foreground"
-                  )}
-                />
-              </FormControl>
-              <FormMessage/>
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+    <div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center justify-between space-x-3">
+          <FormField
+            control={form.control}
+            name="range"
+            render={({field}) => (
+              <FormItem className="flex flex-col mr-6">
+                <FormControl>
+                  <DatePickerWithRange
+                    className={cn(
+                      "w-[240px] pl-3 text-left font-normal",
+                      !field.value && "text-muted-foreground"
+                    )}
+                  />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="ml-6">Refresh</Button>
+        </form>
+      </Form>
+    </div>
   )
 }
