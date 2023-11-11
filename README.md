@@ -6,7 +6,7 @@
 <p align="center">
 </p>
 <p align="center">
-  <img width="650" src="docs/assets/v2.png">
+  <img width="750" src="docs/assets/v2.png">
 </p>
 
 ---
