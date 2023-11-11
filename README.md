@@ -2,6 +2,15 @@
 
 `mq-watch` is a topic subscriber for MQTT brokers.
 
+---
+<p align="center">
+</p>
+<p align="center">
+  <img width="550" src="docs/assets/current.png">
+</p>
+
+---
+
 ## Installation
 
 > Supported Platforms: `linux_amd64/linux_arm64`.
