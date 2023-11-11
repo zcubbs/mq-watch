@@ -1,9 +1,9 @@
-import React, {useEffect, useRef, useState, RefObject } from 'react';
+import React, {RefObject, useEffect, useRef, useState} from 'react';
 import {Chart, ChartData, ChartDataset, ChartOptions} from 'chart.js';
 import "chart.js/auto";
 // @ts-ignore
 import 'chartjs-adapter-moment';
-import { Line } from 'react-chartjs-2'
+import {Line} from 'react-chartjs-2'
 import {fetchData} from "@/pages/mq-watch/api.ts";
 
 interface LineChartData extends ChartData {
@@ -125,6 +125,8 @@ const MessagesLineChart: React.FC = () => {
       {/*  Toggle Lines*/}
       {/*</button>*/}
       <Line
+        height="220"
+        width="auto"
         ref={chartRef as any}
         data={chartData}
         options={options}

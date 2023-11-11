@@ -8,7 +8,7 @@ import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
 import {Form, FormControl, FormField, FormItem, FormMessage,} from "@/components/ui/form"
 import {toast} from "@/components/ui/use-toast"
-import {DatePickerWithRange} from "@/components/date-range-picker.tsx";
+import {CalendarDateRangePicker} from "@/pages/mq-watch/components/date-range-picker.tsx";
 
 const FormSchema = z.object({
   range: z.string({
@@ -43,7 +43,7 @@ export function DatePickerForm() {
             render={({field}) => (
               <FormItem className="flex flex-col mr-6">
                 <FormControl>
-                  <DatePickerWithRange
+                  <CalendarDateRangePicker
                     className={cn(
                       "w-[240px] pl-3 text-left font-normal",
                       !field.value && "text-muted-foreground"
