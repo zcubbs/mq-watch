@@ -116,7 +116,10 @@ function MQWatchPage() {
             <CardTitle>Top Tenants Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <TopTenants />
+            <TopTenants
+              startDate={dateRange.from}
+              endDate={dateRange.to}
+            />
           </CardContent>
         </Card>
       </div>

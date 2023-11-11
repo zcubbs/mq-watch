@@ -1,53 +1,47 @@
-import {Avatar, AvatarFallback,} from "@/components/ui/avatar.tsx"
+import {useState, useEffect, FC} from 'react';
+import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
+import {fetchTopTenantsForDateRange} from "@/pages/mq-watch/api.ts";
 
-export function TopTenants() {
+interface Tenant {
+  tenant: string;
+  messageCount: number;
+}
+
+interface TopTenantsProps {
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export const TopTenants: FC<TopTenantsProps> = ({ startDate, endDate }) => {
+  const [topTenants, setTopTenants] = useState<Tenant[]>([]);
+
+  useEffect(() => {
+    const defaultStartDate = startDate ?? new Date();
+    const defaultEndDate = endDate ?? new Date();
+
+    // Use the ISO strings directly for the API call
+    fetchTopTenantsForDateRange(defaultStartDate.toISOString(), defaultEndDate.toISOString())
+      .then((data: Tenant[]) => {
+        setTopTenants(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching top tenants:", error);
+      });
+  }, [startDate, endDate]); // Include dependencies
+
   return (
     <div className="space-y-8">
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarFallback>1</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Tenant 1</p>
+      {topTenants.slice(0, 6).map((tenant, index) => (
+        <div key={tenant.tenant} className="flex items-center">
+          <Avatar className="h-9 w-9">
+            <AvatarFallback>{index + 1}</AvatarFallback>
+          </Avatar>
+          <div className="ml-4 space-y-1">
+            <p className="text-sm font-medium leading-none">{tenant.tenant}</p>
+          </div>
+          <div className="ml-auto font-medium">{tenant.messageCount.toLocaleString()}</div>
         </div>
-        <div className="ml-auto font-medium">80 000</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarFallback>2</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Tenant 2</p>
-        </div>
-        <div className="ml-auto font-medium">39 057</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarFallback>3</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Tenant 3</p>
-        </div>
-        <div className="ml-auto font-medium">28 122</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarFallback>4</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Tenant 4</p>
-        </div>
-        <div className="ml-auto font-medium">19 511</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarFallback>5</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Tenant 5</p>
-        </div>
-        <div className="ml-auto font-medium">6 322</div>
-      </div>
+      ))}
     </div>
-  )
-}
+  );
+};

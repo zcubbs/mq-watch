@@ -91,6 +91,30 @@ func GetMessagesTotalPerDay(db *gorm.DB, startDate time.Time, endDate time.Time)
 	return data, nil
 }
 
+// TopTenant is a struct that will hold the tenant name and message count for the top tenants query.
+type TopTenant struct {
+	Tenant       string `json:"tenant"`
+	MessageCount int64  `json:"messageCount"`
+}
+
+// GetTopTenants retrieves the top tenants based on message count.
+func GetTopTenants(db *gorm.DB, startDate, endDate time.Time) ([]TopTenant, error) {
+	var topTenants []TopTenant
+	err := db.Model(&models.MessageCount{}).
+		Select("tenant, SUM(count) as message_count").
+		Where("created_at BETWEEN ? AND ?", startDate, endDate).
+		Group("tenant").
+		Order("SUM(count) DESC").
+		Limit(6).
+		Find(&topTenants).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return topTenants, nil
+}
+
 func SaveMessage(db *gorm.DB, tenant string, count int, createDateIn string) {
 	var createDate time.Time
 	if createDateIn == "" {

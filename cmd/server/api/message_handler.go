@@ -88,3 +88,29 @@ func TotalMessagesPerDayHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	// Returning the results in JSON format
 	return c.Status(http.StatusOK).JSON(totals)
 }
+
+// GetTopTenantsHandler retrieves the top tenants based on message count.
+func GetTopTenantsHandler(conn *gorm.DB, c *fiber.Ctx) error {
+	// Parsing dates from the request parameters
+	startDateStr := c.Query("start_date")
+	endDateStr := c.Query("end_date")
+
+	// Error handling for date parsing
+	startDate, err := time.Parse(time.RFC3339, startDateStr)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid start_date format"})
+	}
+
+	endDate, err := time.Parse(time.RFC3339, endDateStr)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid end_date format"})
+	}
+
+	// Use a database function to get top tenants
+	topTenants, err := db.GetTopTenants(conn, startDate, endDate)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	// Return the top tenants in JSON format
+	return c.Status(http.StatusOK).JSON(topTenants)
+}
