@@ -3,5 +3,6 @@
 .env
 
 /bin/
+/tmp/
 /dist/
 *.db
