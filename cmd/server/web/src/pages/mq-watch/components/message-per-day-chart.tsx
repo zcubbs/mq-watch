@@ -3,7 +3,7 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recha
 import { fetchTotalMessagesPerDay } from '../api';
 
 interface MessagePerTenantListProps {
-  startDate?: Date; // Make these optional if they can be not provided
+  startDate?: Date;
   endDate?: Date;
 }
 
@@ -12,17 +12,15 @@ interface ChartData {
   total: number;
 }
 
-export const MessagePerTenantList: FC<MessagePerTenantListProps> = ({ startDate, endDate }) => {
+export const MessagePerDayChart: FC<MessagePerTenantListProps> = ({ startDate, endDate }) => {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Provide default dates if not supplied
     const defaultStartDate = startDate ?? new Date();
     const defaultEndDate = endDate ?? new Date();
 
-    // Convert dates to RFC3339 format or your preferred format
     const formattedStartDate = defaultStartDate.toISOString();
     const formattedEndDate = defaultEndDate.toISOString();
 
@@ -35,8 +33,7 @@ export const MessagePerTenantList: FC<MessagePerTenantListProps> = ({ startDate,
         setError(err.message);
         setLoading(false);
       });
-
-  }, [startDate, endDate]); // Dependencies should be the exact props
+  }, [startDate, endDate]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -63,18 +60,19 @@ export const MessagePerTenantList: FC<MessagePerTenantListProps> = ({ startDate,
           formatter={(value: number) => [`Total: ${value}`]}
           labelFormatter={(name: string) => `Date: ${name}`}
           contentStyle={{
-            backgroundColor: '#333', // Dark background
-            borderColor: '#777',     // Lighter border color
-            borderRadius: '4px',     // Rounded corners
-            color: '#fff'            // White text color
+            backgroundColor: '#333',
+            borderColor: '#777',
+            borderRadius: '4px',
+            color: '#fff'
           }}
           itemStyle={{
-            color: '#fff'            // White text for items
+            color: '#fff'
           }}
         />
-        <Bar dataKey="total" fill="#adfa1d" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="total" fill="#008080" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
-
   );
 };
+
+export default MessagePerDayChart;

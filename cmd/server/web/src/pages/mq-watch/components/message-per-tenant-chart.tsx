@@ -65,7 +65,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label })
   return null;
 };
 
-const MessagesLineChart: FC<MessagesLineChartProps> = ({ startDate, endDate }) => {
+const MessagePerTenantChart: FC<MessagesLineChartProps> = ({ startDate, endDate }) => {
   const [chartData, setChartData] = useState<RechartsLineChartData[]>([]);
 
   useEffect(() => {
@@ -98,4 +98,4 @@ const MessagesLineChart: FC<MessagesLineChartProps> = ({ startDate, endDate }) =
   );
 };
 
-export default MessagesLineChart;
+export default MessagePerTenantChart;

@@ -1,11 +1,11 @@
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import MessagesLineChart from "@/pages/mq-watch/components/chart-v2.tsx";
-import {MessagePerTenantList} from "@/pages/mq-watch/components/message-per-tenant-list.tsx";
 import {TopTenants} from "@/pages/mq-watch/components/top-tenants.tsx";
 import {useState} from "react";
 import {CalendarDateRangePicker} from "@/pages/mq-watch/components/date-range-picker.tsx";
 import {subDays} from "date-fns";
 import {DateRange} from "react-day-picker";
+import MessagePerDayChart from "@/pages/mq-watch/components/message-per-day-chart.tsx";
+import MessagePerTenantChart from "@/pages/mq-watch/components/message-per-tenant-chart.tsx";
 
 interface DateRangeState {
   from: Date;
@@ -97,7 +97,7 @@ function MQWatchPage() {
             <CardTitle>Total Messages Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <MessagePerTenantList
+            <MessagePerDayChart
               startDate={dateRange.from}
               endDate={dateRange.to}
             />
@@ -108,7 +108,7 @@ function MQWatchPage() {
             <CardTitle>Messages Count Per Tenant</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <MessagesLineChart startDate={dateRange.from} endDate={dateRange.to} />
+            <MessagePerTenantChart startDate={dateRange.from} endDate={dateRange.to} />
           </CardContent>
         </Card>
         <Card className="col-span-2">
