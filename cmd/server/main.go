@@ -108,5 +108,7 @@ func messageHandler(conn *gorm.DB, msg mqtt.Message) {
 		return
 	}
 
+	log.Info("Received message", "payload", payload)
+
 	db.SaveMessage(conn, payload.Tenant, 1, payload.CreatedAt)
 }
