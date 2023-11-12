@@ -1,0 +1,9 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mq-watch
+data:
+  config.yaml: |-
+  {{ .Values.config | nindent 12 }}

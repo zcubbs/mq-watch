@@ -1,0 +1,4 @@
+deployment:
+  image: ghcr.io/zcubbs/mq-watch
+  tag: latest
+  extraEnv: []
