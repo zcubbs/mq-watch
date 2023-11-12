@@ -38,7 +38,7 @@ func main() {
 }
 
 func publishMockData(client mqtt.Client) {
-	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
+	rand.New(rand.NewSource(time.Now().UnixNano())) // Seed the random number generator
 	for _, tenant := range tenants {
 		// Generate 1 to 3 topics for each tenant, but ensure Tenant1 has exactly 3 topics.
 		numTopics := rand.Intn(3) + 1
