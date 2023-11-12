@@ -79,6 +79,53 @@ server:
 task run
 ```
 
+## Roadmap
+
+### Messages Over Time
+- **Description**: Visualize the growth or decline in message traffic over time.
+- **Visualization**: Line graph showing the trend of total messages per day/week/month.
+
+### Average Messages per Tenant
+- **Description**: Display the average number of messages sent by each tenant.
+- **Visualization**: Bar chart comparing average messages across tenants.
+
+### Most Active Hours
+- **Description**: Identify peak periods of messaging activity.
+- **Visualization**: Heatmap or bar chart showing message volume by hour or time of day.
+
+### Message Size Statistics
+- **Description**: Provide insights into the sizes of messages being sent.
+- **Visualization**: Statistics display for average, minimum, maximum, and total message sizes.
+
+### Failed Messages
+- **Description**: Track the rate and count of message delivery failures.
+- **Visualization**: Counter or percentage display indicating failure rates.
+
+### System Health
+- **Description**: Monitor the health of the messaging system's infrastructure.
+- **Visualization**: Dashboard indicators for server CPU, memory usage, and error rates.
+
+### Tenant Engagement
+- **Description**: Gauge the engagement level of each tenant.
+- **Visualization**: Metric based on the number of active days or message interactions.
+
+### New Tenants
+- **Description**: Keep track of the growth in the number of tenants.
+- **Visualization**: Incremental counter for new tenants added within a date range.
+
+### Response Time
+- **Description**: Measure the responsiveness of the messaging system.
+- **Visualization**: Display for the average response time for message processing.
+
+### Message Type Breakdown
+- **Description**: Differentiate between the various types of messages sent.
+- **Visualization**: Pie chart or bar graph breaking down messages by type.
+
+### Tenant Comparison
+- **Description**: Compare messaging statistics between two tenants.
+- **Visualization**: Side-by-side comparison of key messaging stats.
+
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
