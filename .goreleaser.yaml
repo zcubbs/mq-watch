@@ -12,13 +12,42 @@ builds:
     goarch:
       - amd64
       - arm64
-    id: "cli"
+    id: "server"
     dir: .
     main: cmd/server/main.go
     ldflags:
       - -s -w -X main.Version={{.Version}} -X main.Commit={{.Commit}} -X main.Date={{.Date}}
+  - env: [CGO_ENABLED=0]
+    binary: mq-watch
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    id: "cli"
+    dir: .
+    main: cmd/cli/main.go
+    ldflags:
+      - -s -w -X main.Version={{.Version}} -X main.Commit={{.Commit}} -X main.Date={{.Date}}
 
 archives:
+  - id: server-archive
+    format: tar.gz
+    files:
+      - none*
+    builds:
+      - server
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
   - id: cli-archive
     format: tar.gz
     files:
@@ -29,7 +58,7 @@ archives:
       - goos: windows
         format: zip
     name_template: >-
-      {{ .ProjectName }}_
+      {{ .ProjectName }}_cli_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386

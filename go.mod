@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/gofiber/fiber/v2 v2.50.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	github.com/zcubbs/logwrapper v0.1.4
 	github.com/zcubbs/x v0.1.14
@@ -22,6 +23,7 @@ require (
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect

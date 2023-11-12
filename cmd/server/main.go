@@ -22,6 +22,12 @@ var (
 	configPath = flag.String("config", ".", "Path to the configuration file")
 )
 
+var (
+	Version = "dev"
+	Commit  = "none"
+	Date    = "unknown"
+)
+
 //go:embed web/dist/*
 var webDist embed.FS
 
@@ -31,6 +37,8 @@ var (
 
 func main() {
 	flag.Parse()
+
+	log.Info("Starting mq-watch", "version", Version, "commit", Commit, "date", Date)
 
 	cfg, err := config.LoadConfiguration(*configPath)
 	if err != nil {
