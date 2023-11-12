@@ -2,13 +2,23 @@ name: Release Charts
 
 on:
   workflow_dispatch:
+    inputs:
+      chart:
+        type: choice
+        description: 'Select the chart to release'
+        options:
+          - 'mq-watch'
+          - 'mosquitto'
+        required: true
 
 permissions:
   contents: write
   packages: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -38,17 +48,17 @@ jobs:
           HELM_EXPERIMENTAL_OCI: '1'
           CHARTS_REPO: ghcr.io/${{ github.repository }}
           VERSION: ${{ github.ref_name }}
-        # read chart version from Chart.yaml and increment it
-        # then update Chart.yaml and push it back to the repo
+          CHART_NAME: ${{ github.event.inputs.chart }}
         run: |
-          CURRENT_CHART_VERSION=$(yq e '.version' charts/mq-watch/Chart.yaml)
+          CHART_PATH="charts/${CHART_NAME}"
+          CURRENT_CHART_VERSION=$(yq e '.version' ${CHART_PATH}/Chart.yaml)
           CHART_VERSION=$(echo $CURRENT_CHART_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
           echo "Chart version: $CHART_VERSION"
-          cd charts/mq-watch
+          cd $CHART_PATH
           helm dep up
           helm package . --version ${CHART_VERSION} --app-version ${VERSION}
-          helm push mq-watch-${CHART_VERSION}.tgz oci://${CHARTS_REPO}
+          helm push ${CHART_NAME}-${CHART_VERSION}.tgz oci://${CHARTS_REPO}
           sed -i "s/version: ${CURRENT_CHART_VERSION}/version: ${CHART_VERSION}/g" Chart.yaml
           git add Chart.yaml
-          git commit -m "📦 Bump chart version to ${CHART_VERSION}"
+          git commit -m "📦 Bump ${CHART_NAME} chart version to ${CHART_VERSION}"
           git push origin ${{ github.ref_name }}
