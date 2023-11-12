@@ -2,6 +2,15 @@
 
 `mq-watch` is a topic subscriber for MQTT brokers.
 
+---
+<p align="center">
+</p>
+<p align="center">
+  <img width="750" src="docs/assets/v2.png">
+</p>
+
+---
+
 ## Installation
 
 > Supported Platforms: `linux_amd64/linux_arm64`.
@@ -36,16 +45,24 @@ mq-watch is configured via a YAML file you can provide to the container/binary. 
 
 ```yaml
 mqtt:
-  host: <string>              # MQTT broker host
-  port: <int>                 # MQTT broker port  
-  username: <string>          # MQTT broker username
-  password: <string>          # MQTT broker password
-  tls: <bool>                 # Use TLS (true/false)
-  caCert: <string>            # Path to CA certificate
-  clientCert: <string>        # Path to client certificate
-  clientKey: <string>         # Path to client key
-  clientID: <string>          # Client ID
-  topic: <string>             # Topic to subscribe to
+  broker: "mqtt://127.0.0.1:1883" # or "mqtts://
+  client_id: "my_client_id" # client id to use when connecting to the broker
+
+tenants:
+  - name: "tenant1" # tenant name
+    topics: # list of topics to subscribe to
+      - "tenant1/#" # topic filter
+  - name: "tenant2"
+    topics:
+      - "tenant2/#"
+
+database:
+  dialect: "sqlite" # or "postgres"
+  datasource: "mq-watch.db" # or "postgres://user:password@host:port/dbname?sslmode=disable"
+  auto_migrate: true # automatically migrate the database schema on startup
+
+server:
+  port: 8000 # port to listen on
 
 ```
 

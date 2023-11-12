@@ -1,11 +1,13 @@
 package config
 
 import (
-	"fmt"
 	"github.com/spf13/viper"
+	"github.com/zcubbs/x/pretty"
 )
 
 func LoadConfiguration(configFile string) (Configuration, error) {
+	var configuration Configuration
+
 	v := viper.New()
 	v.SetConfigFile(configFile)
 
@@ -17,7 +19,6 @@ func LoadConfiguration(configFile string) (Configuration, error) {
 		return Configuration{}, err
 	}
 
-	var configuration Configuration
 	if err := v.Unmarshal(&configuration); err != nil {
 		return Configuration{}, err
 	}
@@ -27,10 +28,5 @@ func LoadConfiguration(configFile string) (Configuration, error) {
 
 func PrintConfiguration(config Configuration) {
 	// Print out the configuration
-	fmt.Printf("MQTT Broker: %s\n", config.MQTT.Broker)
-	fmt.Printf("MQTT Topic: %s\n", config.MQTT.Topic)
-	fmt.Printf("Database Dialect: %s\n", config.Database.Dialect)
-	fmt.Printf("Database Datasource: %s\n", config.Database.Datasource)
-	fmt.Printf("Database AutoMigrate: %t\n", config.Database.AutoMigrate)
-	fmt.Printf("Server Port: %d\n", config.Server.Port)
+	pretty.PrintJson(config)
 }

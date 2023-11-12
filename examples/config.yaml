@@ -1,7 +1,40 @@
 mqtt:
-  broker: "mqtt://127.0.0.1:1883"
-  topic: "my_topic"
-  client_id: "my_client_id"
+  broker: "tcp://127.0.0.1:1883" # match the broker address used in generate_data.go
+  client_id: "mq-watch" # match the client ID used in generate_data.go
+
+tenants:
+  - name: "Tenant1"
+    topics:
+      - "Tenant1/topic1"
+      - "Tenant1/topic2"
+      - "Tenant1/topic3"
+  - name: "Tenant2"
+    topics:
+      - "Tenant2/topic1"
+  - name: "Tenant3"
+    topics:
+      - "Tenant3/topic1"
+  - name: "Tenant4"
+    topics:
+      - "Tenant4/topic1"
+  - name: "Tenant5"
+    topics:
+      - "Tenant5/topic1"
+  - name: "Tenant6"
+    topics:
+      - "Tenant6/topic1"
+  - name: "Tenant7"
+    topics:
+      - "Tenant7/topic1"
+  - name: "Tenant8"
+    topics:
+      - "Tenant8/topic1"
+  - name: "Tenant9"
+    topics:
+      - "Tenant9/topic1"
+  - name: "Tenant10"
+    topics:
+      - "Tenant10/topic1"
 
 database:
   dialect: "sqlite"

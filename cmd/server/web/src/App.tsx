@@ -1,6 +1,5 @@
 import MQWatchPage from "@/pages/mq-watch/page.tsx";
 import {ThemeProvider} from "@/context/theme-provider";
-import Header from "@/components/header.tsx";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 
 // Initialize a new query client
@@ -11,8 +10,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey=" vite-ui-theme">
       <QueryClientProvider client={queryClient}>
-          <Header/>
-          <MQWatchPage/>
+        <MQWatchPage/>
       </QueryClientProvider>
     </ThemeProvider>
   )

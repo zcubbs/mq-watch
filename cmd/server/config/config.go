@@ -3,6 +3,7 @@ package config
 // Configuration holds all the configuration data
 type Configuration struct {
 	MQTT     MQTTConfiguration     `mapstructure:"mqtt"`
+	Tenants  []TenantConfiguration `mapstructure:"tenants"`
 	Database DatabaseConfiguration `mapstructure:"database"`
 	Server   ServerConfiguration   `mapstructure:"server"`
 }
@@ -10,8 +11,13 @@ type Configuration struct {
 // MQTTConfiguration holds MQTT related configuration
 type MQTTConfiguration struct {
 	Broker   string `mapstructure:"broker"`
-	Topic    string `mapstructure:"topic"`
 	ClientID string `mapstructure:"client_id"`
+}
+
+// TenantConfiguration holds tenant related configuration
+type TenantConfiguration struct {
+	Name   string   `mapstructure:"name"`
+	Topics []string `mapstructure:"topics"`
 }
 
 // DatabaseConfiguration holds database related configuration
