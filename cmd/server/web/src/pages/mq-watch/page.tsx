@@ -7,6 +7,7 @@ import {DateRange} from "react-day-picker";
 import MessagePerDayChart from "@/pages/mq-watch/components/message-per-day-chart.tsx";
 import MessagePerTenantChart from "@/pages/mq-watch/components/message-per-tenant-chart.tsx";
 import TotalMessageStat from "@/pages/mq-watch/components/total-message-stat.tsx";
+import TopTenantStat from "@/pages/mq-watch/components/top-tenant-stat.tsx";
 
 interface DateRangeState {
   from: Date;
@@ -44,31 +45,7 @@ function MQWatchPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6 pl-8 pr-8 pb-6">
         <TotalMessageStat startDate={dateRange.from} endDate={dateRange.to} />
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Top Tenant
-            </CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
-          </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Tenant1</div>
-              <p className="text-xs text-muted-foreground">
-                with 80 000 messages
-              </p>
-            </CardContent>
-        </Card>
+        <TopTenantStat startDate={dateRange.from} endDate={dateRange.to} />
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6 pl-8 pr-8 pb-6">
         <Card className="col-span-2">
