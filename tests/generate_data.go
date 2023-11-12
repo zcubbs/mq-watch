@@ -1,9 +1,10 @@
 package main
 
 import (
+	crand "crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -38,10 +39,9 @@ func main() {
 }
 
 func publishMockData(client mqtt.Client) {
-	rand.New(rand.NewSource(time.Now().UnixNano())) // Seed the random number generator
 	for _, tenant := range tenants {
 		// Generate 1 to 3 topics for each tenant, but ensure Tenant1 has exactly 3 topics.
-		numTopics := rand.Intn(3) + 1
+		numTopics := int(getRandInt(3) + 1)
 		if tenant == "Tenant1" {
 			numTopics = 3
 		}
@@ -51,15 +51,15 @@ func publishMockData(client mqtt.Client) {
 			go func(tenant, topic string) {
 				for {
 					// Generate a random CreatedAt date within the last 7 days
-					daysAgo := rand.Intn(7)
+					daysAgo := int(getRandInt(7) + 1)
 					createdAt := time.Now().AddDate(0, 0, -daysAgo).Format(time.RFC3339)
 
 					// Create an instance of MessagePayload with mock data
 					payload := MessagePayload{
-						Device:    fmt.Sprintf("Device_%d", rand.Intn(100)),
+						Device:    fmt.Sprintf("Device_%d", getRandInt(100)),
 						Tenant:    tenant,
 						CreatedAt: createdAt,
-						Data:      fmt.Sprintf("Data_%d", rand.Intn(100)),
+						Data:      fmt.Sprintf("Data_%d", getRandInt(100)),
 					}
 
 					// Marshal the payload into a JSON string
@@ -82,4 +82,13 @@ func publishMockData(client mqtt.Client) {
 	}
 	// Keep the program running
 	select {}
+}
+
+func getRandInt(max int64) int64 {
+	randInt, err := crand.Int(crand.Reader, big.NewInt(max))
+	if err != nil {
+		fmt.Printf("Error generating random int: %v", err)
+	}
+
+	return randInt.Int64()
 }
