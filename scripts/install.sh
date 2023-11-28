@@ -36,8 +36,8 @@ mkdir -p $INSTALL_DIR/config
 echo "Creating initial configuration file..."
 cat <<EOL > $INSTALL_DIR/config/config.yaml
 mqtt:
-  broker: "tcp://127.0.0.1:1883" # match the broker address used in generate_data.go
-  client_id: "mq-watch" # match the client ID used in generate_data.go
+  broker: "tcp://127.0.0.1:1883"
+  client_id: "mq-watch"
 
 tenants: []
 
@@ -64,7 +64,7 @@ Description=mq-watch Service
 After=network.target
 
 [Service]
-ExecStart=$INSTALL_DIR/mq-watch -config $INSTALL_DIR/config
+ExecStart=$INSTALL_DIR/mq-watch -config $INSTALL_DIR/config/config.yaml
 EnvironmentFile=$ENV_FILE
 Restart=always
 User=$SERVICE_USER
