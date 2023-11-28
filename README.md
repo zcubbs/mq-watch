@@ -15,6 +15,12 @@
 
 > Supported Platforms: `linux_amd64/linux_arm64`.
 
+### From script
+
+```bash
+curl -sfL https://raw.githubusercontent.com/zcubbs/mq-watch/main/scripts/install.sh | sudo bash 
+```
+
 ### From Binary
 
 You can download the latest release from [here](https://github.com/zcubbs/mq-watch/releases)
