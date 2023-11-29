@@ -37,19 +37,11 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Set up Node
-        uses: actions/setup-node@v2.4.0
-        with:
-          node-version: '18.x'
-
       - name: Install Task
         uses: arduino/setup-task@v1.0.3
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install Linter
-        run: task build:web
 
       - name: Install Security Scanner
         run: task tools:install:gosec

@@ -14,6 +14,7 @@ import (
 	"github.com/zcubbs/mq-watch/cmd/server/db"
 	"github.com/zcubbs/mq-watch/cmd/server/logger"
 	"github.com/zcubbs/mq-watch/cmd/server/mqttclient"
+	"github.com/zcubbs/mq-watch/cmd/server/web"
 	"gorm.io/gorm"
 	"net/http"
 )
@@ -71,15 +72,15 @@ func main() {
 	})
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
+		AllowOrigins: "http://localhost:3000",
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
 	// Serve the web app
 	app.Use("/", filesystem.New(
 		filesystem.Config{
-			Root:       http.FS(webDist),
-			PathPrefix: "web/dist",
+			Root:       http.FS(web.SpaFiles),
+			PathPrefix: "dist",
 			Browse:     false,
 		},
 	))
@@ -101,9 +102,15 @@ func main() {
 
 	// Run the server
 	log.Info("Starting server", "port", cfg.Server.Port)
-	err = app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
-	if err != nil {
-		log.Fatal("Error starting server", "error", err)
+
+	port := fmt.Sprintf(":%d", cfg.Server.Port)
+
+	if cfg.Server.TlsEnabled {
+		log.Info("Starting server with TLS enabled")
+		log.Fatal("failed to run tls secure server", app.ListenTLS(port, cfg.Server.TlsCertFile, cfg.Server.TlsKeyFile))
+	} else {
+		log.Info("Starting server with TLS disabled")
+		log.Fatal("failed to run server", app.Listen(port))
 	}
 }
 

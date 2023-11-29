@@ -6,3 +6,6 @@
 /tmp/
 /dist/
 *.db
+
+/cmd/server/web/dist/
+!/cmd/server/web/dist/.gitkeep

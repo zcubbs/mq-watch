@@ -46,5 +46,8 @@ type PostgresConfiguration struct {
 
 // ServerConfiguration holds HTTP server related configuration
 type ServerConfiguration struct {
-	Port int `mapstructure:"port"`
+	Port        int    `mapstructure:"port"`
+	TlsEnabled  bool   `mapstructure:"tls_enabled"`
+	TlsCertFile string `mapstructure:"tls_cert_file"`
+	TlsKeyFile  string `mapstructure:"tls_key_file"`
 }

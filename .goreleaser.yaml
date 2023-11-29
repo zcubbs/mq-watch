@@ -31,6 +31,7 @@ builds:
     hooks:
       pre:
         - task build:web
+        - task copy:web
     main: cmd/cli/main.go
     ldflags:
       - -s -w -X main.Version={{.Version}} -X main.Commit={{.Commit}} -X main.Date={{.Date}}

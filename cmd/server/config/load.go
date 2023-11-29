@@ -19,6 +19,7 @@ func LoadConfiguration(configFile string) (Configuration, error) {
 	v.SetConfigFile(configFile)
 
 	v.SetDefault("database.sqlite.datasource", "mq-watch.db")
+	v.SetDefault("server.port", "8000")
 
 	for k, val := range envKeys {
 		err := v.BindEnv(k, strings.ToUpper(val))
@@ -62,4 +63,8 @@ var envKeys = map[string]string{
 	"database.postgres.dbname":      "DATABASE_POSTGRES_DBNAME",
 	"database.postgres.sslmode":     "DATABASE_POSTGRES_SSLMODE",
 	"database.postgres.automigrate": "DATABASE_POSTGRES_AUTOMIGRATE",
+	"server.port":                   "SERVER_PORT",
+	"server.tls_enabled":            "SERVER_TLS_ENABLED",
+	"server.tls_cert_file":          "SERVER_TLS_CERT_FILE",
+	"server.tls_key_file":           "SERVER_TLS_KEY_FILE",
 }
