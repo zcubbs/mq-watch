@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -28,9 +27,6 @@ var (
 	Commit  = "none"
 	Date    = "unknown"
 )
-
-//go:embed web/dist/*
-var webDist embed.FS
 
 var (
 	log = logger.L()
