@@ -65,6 +65,7 @@ func newTLSConfig(cfg config.MQTTConfiguration) *tls.Config {
 	}
 	certPool.AppendCertsFromPEM(ca)
 	return &tls.Config{
-		RootCAs: certPool,
+		RootCAs:    certPool,
+		MinVersion: tls.VersionTLS12,
 	}
 }
