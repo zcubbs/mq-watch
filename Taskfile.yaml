@@ -13,6 +13,12 @@ tasks:
     cmds:
       - task: build:{{OS}}
 
+  build:web:
+    dir: cmd/server/web
+    cmds:
+      - npm install
+      - npm run build
+
   build:windows:
     cmds:
       - go env -w CGO_ENABLED=1 GOOS=windows GOARCH=amd64

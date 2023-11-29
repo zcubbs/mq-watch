@@ -1,6 +1,6 @@
 mqtt:
-  broker: "mqtt://127.0.0.1:1883" # match the broker address used in generate_data.go
-  client_id: "mq-watch" # match the client ID used in generate_data.go
+  broker: "mqtt://127.0.0.1:1883"
+  client_id: "mq-watch"
 
 tenants:
   - name: "Tenant1"
