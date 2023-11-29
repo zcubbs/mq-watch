@@ -1,5 +1,5 @@
 mqtt:
-  broker: "mqtt://127.0.0.1:1883" # match the broker address used in generate_data.go
+  broker: "mqtt://mosquitto:1883" # match the broker address used in generate_data.go
   client_id: "mq-watch" # match the client ID used in generate_data.go
 
 tenants:
@@ -35,20 +35,6 @@ tenants:
   - name: "Tenant10"
     topics:
       - "Tenant10/topic1"
-
-database:
-  sqlite:
-    enabled: false
-    datasource: "mq-watch.db"
-    auto_migrate: true
-  postgres:
-    enabled: true
-    host: "127.0.0.1"
-    port: 5432
-    username: "postgres"
-    password: "postgres"
-    database: "mq-watch"
-    auto_migrate: true
 
 server:
   port: 8000

@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    # build Dockerfile.dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_POSTGRES_ENABLED=true
+      - DATABASE_POSTGRES_HOST=db
+      - DATABASE_POSTGRES_PORT=5432
+      - DATABASE_POSTGRES_USER=postgres
+      - DATABASE_POSTGRES_PASSWORD=postgres
+      - DATABASE_POSTGRES_DBNAME=mq-watch
+    volumes:
+      - ./examples:/examples:ro
+    depends_on:
+      - db
+    command: ["-config", "/examples/config.dev.yaml"]
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: mq-watch
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - mq_watch_postgres_data:/var/lib/postgresql/data
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+    # allow anonymous connections
+    command: ["mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+    volumes:
+      - ./tests/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+volumes:
+  mq_watch_postgres_data:

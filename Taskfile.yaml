@@ -71,6 +71,10 @@ tasks:
     cmds:
       - docker run -d -v $(pwd)/tests/mosquitto.conf:/mosquitto/config/mosquitto.conf -p 1883:1883 --name mosquitto eclipse-mosquitto
 
+  containers:up:postgres:
+    cmds:
+      - docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres  -e POSTGRES_USER=postgres -e POSTGRES_DB=mq-watch --name postgres postgres:14.0-alpine
+
   containers:down:
     cmds:
       - docker stop mosquitto
@@ -80,3 +84,8 @@ tasks:
     cmds:
       - docker stop mosquitto
       - docker rm mosquitto
+
+  containers:down:postgres:
+    cmds:
+      - docker stop postgres
+      - docker rm postgres

@@ -5,17 +5,13 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - env: [CGO_ENABLED=1]
+  - env: [CGO_ENABLED=0]
     binary: mq-watch
     goos:
       - linux
     goarch:
       - amd64
-    overrides:
-      - goos: linux
-        goarch: amd64
-        env:
-          - CC=gcc
+      - arm64
     id: "server"
     dir: .
     main: cmd/server/main.go

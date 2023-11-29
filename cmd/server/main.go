@@ -47,7 +47,6 @@ func main() {
 
 	config.PrintConfiguration(cfg)
 
-	log.Info("Connecting to database", "datasource", cfg.Database.Datasource)
 	conn, err := db.InitializeDB(cfg.Database)
 	if err != nil {
 		log.Fatal("Error initializing database", "error", err)

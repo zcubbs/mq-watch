@@ -22,8 +22,25 @@ type TenantConfiguration struct {
 
 // DatabaseConfiguration holds database related configuration
 type DatabaseConfiguration struct {
-	Dialect     string `mapstructure:"dialect"`
+	Sqlite   SQLiteConfiguration   `mapstructure:"sqlite"`
+	Postgres PostgresConfiguration `mapstructure:"postgres"`
+}
+
+// SQLiteConfiguration holds SQLite related configuration
+type SQLiteConfiguration struct {
+	Enabled     bool   `mapstructure:"enabled"`
 	Datasource  string `mapstructure:"datasource"`
+	AutoMigrate bool   `mapstructure:"auto_migrate"`
+}
+
+// PostgresConfiguration holds PostgreSQL related configuration
+type PostgresConfiguration struct {
+	Enabled     bool   `mapstructure:"enabled"`
+	Host        string `mapstructure:"host"`
+	User        string `mapstructure:"user"`
+	Password    string `mapstructure:"password"`
+	DBName      string `mapstructure:"dbname"`
+	SSLMode     bool   `mapstructure:"sslmode"`
 	AutoMigrate bool   `mapstructure:"auto_migrate"`
 }
 
