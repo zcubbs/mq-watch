@@ -10,10 +10,12 @@ type Configuration struct {
 
 // MQTTConfiguration holds MQTT related configuration
 type MQTTConfiguration struct {
-	Broker   string `mapstructure:"broker"`
-	ClientID string `mapstructure:"client_id"`
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
+	Broker      string `mapstructure:"broker"`
+	ClientID    string `mapstructure:"client_id"`
+	Username    string `mapstructure:"username"`
+	Password    string `mapstructure:"password"`
+	TlsEnabled  bool   `mapstructure:"tls_enabled"`
+	TlsCertFile string `mapstructure:"tls_cert_file"`
 }
 
 // TenantConfiguration holds tenant related configuration

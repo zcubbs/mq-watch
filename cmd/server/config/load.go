@@ -67,4 +67,10 @@ var envKeys = map[string]string{
 	"server.tls_enabled":             "SERVER_TLS_ENABLED",
 	"server.tls_cert_file":           "SERVER_TLS_CERT_FILE",
 	"server.tls_key_file":            "SERVER_TLS_KEY_FILE",
+	"mqtt.broker":                    "MQTT_BROKER",
+	"mqtt.client_id":                 "MQTT_CLIENT_ID",
+	"mqtt.username":                  "MQTT_USERNAME",
+	"mqtt.password":                  "MQTT_PASSWORD",
+	"mqtt.tls_enabled":               "MQTT_TLS_ENABLED",
+	"mqtt.tls_cert_file":             "MQTT_TLS_CERT_FILE",
 }

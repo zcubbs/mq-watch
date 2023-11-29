@@ -1,9 +1,12 @@
 package mqttclient
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/zcubbs/mq-watch/cmd/server/config"
 	"github.com/zcubbs/mq-watch/cmd/server/logger"
+	"os"
 )
 
 var (
@@ -29,6 +32,9 @@ func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantCo
 	opts.SetDefaultPublishHandler(messagePubHandler)
 	opts.SetUsername(cfg.Username)
 	opts.SetPassword(cfg.Password)
+	if cfg.TlsEnabled {
+		opts.SetTLSConfig(newTLSConfig(cfg))
+	}
 	opts.OnConnect = connectHandler
 	opts.OnConnectionLost = connectLostHandler
 
@@ -47,4 +53,18 @@ func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantCo
 	}
 
 	return client, nil
+}
+
+func newTLSConfig(cfg config.MQTTConfiguration) *tls.Config {
+	certPool := x509.NewCertPool()
+	ca, err := os.ReadFile(cfg.TlsCertFile)
+	if err != nil {
+		log.Fatal("Error reading CA file",
+			"file", cfg.TlsCertFile,
+			"error", err)
+	}
+	certPool.AppendCertsFromPEM(ca)
+	return &tls.Config{
+		RootCAs: certPool,
+	}
 }
