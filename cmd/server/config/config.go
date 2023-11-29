@@ -12,6 +12,8 @@ type Configuration struct {
 type MQTTConfiguration struct {
 	Broker   string `mapstructure:"broker"`
 	ClientID string `mapstructure:"client_id"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
 }
 
 // TenantConfiguration holds tenant related configuration

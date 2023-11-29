@@ -49,6 +49,7 @@ func main() {
 		log.Fatal("Error initializing database", "error", err)
 	}
 
+	log.Info("Initializing MQTT client")
 	mqc, err := mqttclient.ConnectAndSubscribe(
 		cfg.MQTT,
 		cfg.Tenants,

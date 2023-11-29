@@ -3,9 +3,10 @@ version: '3.8'
 services:
   app:
     # build Dockerfile.dev
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.dev
+    image: ghcr.io/zcubbs/mq-watch:0.1.9
     ports:
       - "8001:8000"
     environment:
@@ -15,6 +16,7 @@ services:
       - DATABASE_POSTGRES_USER=postgres
       - DATABASE_POSTGRES_PASSWORD=postgres
       - DATABASE_POSTGRES_DBNAME=mq-watch
+      - DATABASE_POSTGRES_AUTO_MIGRATE=true
       - TLS_ENABLED=false
       - TLS_CERT_PATH=/path/to/fullchain.pem
       - TLS_KEY_PATH=/path/to/privkey.pem

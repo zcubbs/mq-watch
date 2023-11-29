@@ -27,6 +27,8 @@ func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantCo
 	opts.AddBroker(cfg.Broker)
 	opts.SetClientID(cfg.ClientID)
 	opts.SetDefaultPublishHandler(messagePubHandler)
+	opts.SetUsername(cfg.Username)
+	opts.SetPassword(cfg.Password)
 	opts.OnConnect = connectHandler
 	opts.OnConnectionLost = connectLostHandler
 
