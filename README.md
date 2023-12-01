@@ -1,6 +1,6 @@
 # MQ Watch
 
-`mq-watch` is a topic subscriber for MQTT brokers.
+`mq-watch` is an observability dashboard for MQTT brokers.
 
 ---
 <p align="center">
