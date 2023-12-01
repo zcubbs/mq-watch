@@ -33,7 +33,7 @@ var (
 var Cmd = &cobra.Command{
 	Use:   "mock",
 	Short: "mock",
-	Long:  "example: mqw mock -api http://localhost:8000 -t tenant1/topic1 -c 100 -d \"2023-03-15T15:04:05Z\"",
+	Long:  "example: mq-watch mock -api http://localhost:8000 -T Tenant1 -t Tenant1/Topic1 -c 100 -d \"2023-03-15T15:04:05Z\"",
 	Run: func(cmd *cobra.Command, args []string) {
 		must.Succeed(mock())
 	},

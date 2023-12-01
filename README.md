@@ -72,6 +72,41 @@ server:
 
 ```
 
+## CLI
+
+### Installation
+
+```bash
+curl -sfL https://raw.githubusercontent.com/zcubbs/mq-watch/main/scripts/install-cli.sh | bash
+```
+
+### Usage
+
+```bash
+Usage:
+  mq-watch [command]
+
+Available Commands:
+  about       Print information about the CLI
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  mock        mock
+  version     Print the version
+
+Flags:
+  -h, --help      help for this command
+  -v, --verbose   verbose output
+
+Use " [command] --help" for more information about a command.
+```
+
+### Mock Messages 
+
+```bash
+mq-watch mock -api http://localhost:8000 -T Tenant1 -t Tenant1/Topic1 -c 100 -d "2023-03-15T15:04:05Z",
+```
+    
+
 ## Development
 
 ### Prerequisites
