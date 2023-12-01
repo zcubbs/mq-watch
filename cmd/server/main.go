@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
@@ -16,6 +14,7 @@ import (
 	"github.com/zcubbs/mq-watch/cmd/server/web"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 )
 
 var (
@@ -53,8 +52,8 @@ func main() {
 	mqc, err := mqttclient.ConnectAndSubscribe(
 		cfg.MQTT,
 		cfg.Tenants,
-		func(client mqtt.Client, msg mqtt.Message) {
-			messageHandler(conn, msg)
+		func(tMsg mqttclient.TenantMessage) {
+			messageHandler(conn, tMsg)
 		},
 	)
 	if err != nil {
@@ -96,6 +95,9 @@ func main() {
 	app.Get("/api/message-stats", func(c *fiber.Ctx) error {
 		return api.GetMessageStatsHandler(conn, c)
 	})
+	app.Post("/api/save-messages", func(c *fiber.Ctx) error {
+		return api.SaveMessagesHandler(conn, c)
+	})
 
 	// Run the server
 	log.Info("Starting server", "port", cfg.Server.Port)
@@ -104,28 +106,38 @@ func main() {
 
 	if cfg.Server.TlsEnabled {
 		log.Info("Starting server with TLS enabled")
-		log.Fatal("failed to run tls secure server", app.ListenTLS(port, cfg.Server.TlsCertFile, cfg.Server.TlsKeyFile))
+		log.Fatal("failed to run tls secure server",
+			app.ListenTLS(port, cfg.Server.TlsCertFile, cfg.Server.TlsKeyFile))
 	} else {
 		log.Info("Starting server with TLS disabled")
 		log.Fatal("failed to run server", app.Listen(port))
 	}
 }
 
-type MessagePayload struct {
-	Device    string `json:"device"`
-	Tenant    string `json:"tenant"`
-	CreatedAt string `json:"created_at"`
-	Data      string `json:"data"`
-}
+func messageHandler(conn *gorm.DB, msg mqttclient.TenantMessage) {
+	log.Debug("Received message",
+		"tenant", msg.Tenant,
+		"topic", msg.Message.Topic(),
+	)
 
-func messageHandler(conn *gorm.DB, msg mqtt.Message) {
-	var payload MessagePayload
-	if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
-		log.Error("Error decoding message", "error", err)
-		return
+	var payload string
+	if msg.SavePayload {
+		payload = string(msg.Message.Payload())
+	} else {
+		payload = ""
 	}
 
-	log.Info("Received message", "payload", payload)
+	err := db.SaveMessage(
+		conn, msg.Tenant,
+		msg.Message.Topic(),
+		payload,
+		time.Now().Format(time.RFC3339),
+	)
 
-	db.SaveMessage(conn, payload.Tenant, 1, payload.CreatedAt)
+	if err != nil {
+		log.Error("Error saving message",
+			"tenant", msg.Tenant,
+			"topic", msg.Message.Topic(),
+			"error", err)
+	}
 }

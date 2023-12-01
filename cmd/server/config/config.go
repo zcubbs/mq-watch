@@ -20,8 +20,9 @@ type MQTTConfiguration struct {
 
 // TenantConfiguration holds tenant related configuration
 type TenantConfiguration struct {
-	Name   string   `mapstructure:"name"`
-	Topics []string `mapstructure:"topics"`
+	Name         string   `mapstructure:"name"`
+	SavePayloads bool     `mapstructure:"save_payloads"`
+	Topics       []string `mapstructure:"topics"`
 }
 
 // DatabaseConfiguration holds database related configuration

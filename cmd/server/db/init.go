@@ -46,7 +46,7 @@ func initSqlite(cfg config.SQLiteConfiguration) (*gorm.DB, error) {
 	}
 
 	if cfg.AutoMigrate {
-		err = db.AutoMigrate(&models.MessageCount{})
+		err = db.AutoMigrate(&models.Message{})
 		if err != nil {
 			return nil, fmt.Errorf("error migrating database: %v", err)
 		}
@@ -65,7 +65,7 @@ func initPostgres(cfg config.PostgresConfiguration) (*gorm.DB, error) {
 
 	// Perform auto-migration if needed
 	if cfg.AutoMigrate {
-		err = db.AutoMigrate(&models.MessageCount{})
+		err = db.AutoMigrate(&models.Message{})
 		if err != nil {
 			return nil, fmt.Errorf("error migrating postgres database: %v", err)
 		}

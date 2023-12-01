@@ -85,6 +85,7 @@ tasks:
   containers:up:
     cmds:
       - task: containers:up:mosquitto
+      - task: containers:up:postgres
 
   containers:up:mosquitto:
     cmds:
@@ -92,7 +93,7 @@ tasks:
 
   containers:up:postgres:
     cmds:
-      - docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres  -e POSTGRES_USER=postgres -e POSTGRES_DB=mq-watch --name postgres postgres:14.0-alpine
+      - docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=mq-watch --name postgres postgres:14.0-alpine
 
   containers:down:
     cmds:

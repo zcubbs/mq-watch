@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+	"github.com/zcubbs/mq-watch/cmd/server/logger"
 	"net/http"
 	"sort"
 	"time"
@@ -9,6 +11,8 @@ import (
 	"github.com/zcubbs/mq-watch/cmd/server/db"
 	"gorm.io/gorm"
 )
+
+var log = logger.L()
 
 func MessageHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	// Parsing dates from the request parameters
@@ -26,14 +30,18 @@ func MessageHandler(conn *gorm.DB, c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid end_date format"})
 	}
 
+	log.Info("Getting total messages", "start_date", startDate, "end_date", endDate)
+
 	// Using the functions to get the data
 	totalMessages, err := db.GetTotalMessages(conn, startDate, endDate)
 	if err != nil {
+		log.Error("Error getting total messages", "error", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	dailyMessagesPerTenant, err := db.GetDailyMessagesPerTenant(conn, startDate, endDate)
 	if err != nil {
+		log.Error("Error getting daily messages per tenant", "error", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -149,4 +157,33 @@ func GetMessageStatsHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{"total_messages": totalMessages})
+}
+
+type SaveMessageRequest struct {
+	Tenant    string `json:"tenant"`
+	Topic     string `json:"topic"`
+	Payload   string `json:"payload"`
+	CreatedAt string `json:"created_at"`
+}
+
+type SaveMessagesRequest struct {
+	Messages []SaveMessageRequest `json:"messages"`
+}
+
+func SaveMessagesHandler(conn *gorm.DB, c *fiber.Ctx) error {
+	var req SaveMessagesRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request format"})
+	}
+
+	for _, msg := range req.Messages {
+		if err := db.SaveMessage(conn, msg.Tenant, msg.Topic, msg.Payload, msg.CreatedAt); err != nil {
+			log.Error("Error saving message", "tenant", msg.Tenant, "topic", msg.Topic, "error", err)
+			return c.Status(http.StatusInternalServerError).JSON(
+				fiber.Map{"error": fmt.Sprintf("Error saving message: %v", err)},
+			)
+		}
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{"message": "Messages saved successfully"})
 }

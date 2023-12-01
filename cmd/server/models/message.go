@@ -4,9 +4,10 @@ import (
 	"time"
 )
 
-type MessageCount struct {
+type Message struct {
 	ID        uint `gorm:"primaryKey"`
 	Tenant    string
-	Count     int
+	Topic     string
+	Payload   string
 	CreatedAt time.Time
 }

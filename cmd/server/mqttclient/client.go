@@ -25,7 +25,14 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	log.Error("Connect lost", "error", err)
 }
 
-func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantConfiguration, messageHandler mqtt.MessageHandler) (mqtt.Client, error) {
+// TenantMessage wraps an MQTT message with tenant information
+type TenantMessage struct {
+	Message     mqtt.Message
+	SavePayload bool
+	Tenant      string
+}
+
+func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantConfiguration, messageHandler func(TenantMessage)) (mqtt.Client, error) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(cfg.Broker)
 	opts.SetClientID(cfg.ClientID)
@@ -45,7 +52,17 @@ func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantCo
 
 	for _, tenant := range tenants {
 		for _, topic := range tenant.Topics {
-			if token := client.Subscribe(topic, 0, messageHandler); token.Wait() && token.Error() != nil {
+			// Wrap the messageHandler to include tenant information
+			wrappedHandler := func(client mqtt.Client, msg mqtt.Message) {
+				tenantMsg := TenantMessage{
+					Message:     msg,
+					SavePayload: tenant.SavePayloads,
+					Tenant:      tenant.Name,
+				}
+				messageHandler(tenantMsg)
+			}
+
+			if token := client.Subscribe(topic, 0, wrappedHandler); token.Wait() && token.Error() != nil {
 				return nil, token.Error()
 			}
 			log.Info("Subscribed to topic", "id", topic, "tenant", tenant.Name)

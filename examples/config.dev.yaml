@@ -4,6 +4,7 @@ mqtt:
 
 tenants:
   - name: "Tenant1"
+    save_payloads: false
     topics:
       - "Tenant1/topic1"
       - "Tenant1/topic2"

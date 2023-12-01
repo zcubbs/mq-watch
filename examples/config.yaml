@@ -45,9 +45,9 @@ database:
     enabled: true
     host: "127.0.0.1"
     port: 5432
-    username: "postgres"
+    user: "postgres"
     password: "postgres"
-    database: "mq-watch"
+    dbname: "mq-watch"
     auto_migrate: true
 
 server:
