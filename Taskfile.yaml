@@ -90,10 +90,14 @@ tasks:
   containers:up:mosquitto:
     cmds:
       - docker run -d -v $(pwd)/tests/mosquitto.conf:/mosquitto/config/mosquitto.conf -p 1883:1883 --name mosquitto eclipse-mosquitto
+      - docker start mosquitto
+    ignore_error: true
 
   containers:up:postgres:
     cmds:
       - docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=mq-watch --name postgres postgres:14.0-alpine
+      - docker start postgres
+    ignore_error: true
 
   containers:down:
     cmds:
