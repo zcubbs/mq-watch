@@ -103,7 +103,7 @@ Use " [command] --help" for more information about a command.
 ### Mock Messages 
 
 ```bash
-mq-watch mock --api http://localhost:8000 -T Tenant1 -t Tenant1/Topic1 -c 100 -d "2023-03-15T15:04:05Z",
+mq-watch mock --api http://localhost:8000 -T Tenant1 -t Tenant1/Topic1 -c 100 -d "2023-12-02T15:04:05Z",
 ```
     
 

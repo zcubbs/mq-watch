@@ -81,7 +81,11 @@ func TotalMessagesPerDayHandler(conn *gorm.DB, c *fiber.Ctx) error {
 
 	var totals []totalPerDay
 	for date, count := range messagesTotalPerDay {
-		parsedDate, _ := time.Parse("2006-01-02", date)
+		parsedDate, err := time.Parse(time.RFC3339, date)
+		if err != nil {
+			log.Error("Error parsing date", "date", date, "error", err)
+			continue
+		}
 		formattedDate := parsedDate.Format("02 Jan") // Format as "DD MMM"
 		totals = append(totals, totalPerDay{Name: formattedDate, Total: count})
 	}
