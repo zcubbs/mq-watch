@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/zcubbs/mq-watch/cmd/server/config"
+	"github.com/zcubbs/mq-watch/cmd/server/db"
 	"github.com/zcubbs/mq-watch/cmd/server/logger"
 	"os"
 )
@@ -32,7 +33,7 @@ type TenantMessage struct {
 	Tenant      string
 }
 
-func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantConfiguration, messageHandler func(TenantMessage)) (mqtt.Client, error) {
+func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantConfiguration, store db.Store) (mqtt.Client, error) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(cfg.Broker)
 	opts.SetClientID(cfg.ClientID)
@@ -59,7 +60,7 @@ func ConnectAndSubscribe(cfg config.MQTTConfiguration, tenants []config.TenantCo
 					SavePayload: tenant.SavePayloads,
 					Tenant:      tenant.Name,
 				}
-				messageHandler(tenantMsg)
+				MessageHandler(store, tenantMsg)
 			}
 
 			if token := client.Subscribe(topic, 0, wrappedHandler); token.Wait() && token.Error() != nil {

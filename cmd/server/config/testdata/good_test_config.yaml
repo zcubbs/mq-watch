@@ -1,0 +1,26 @@
+mqtt:
+  broker: "mqtt://mqtt.example.com"
+  client_id: "testClient"
+  username: "testUser"
+  password: "testPassword"
+  tls_enabled: false
+tenants:
+  - name: "Tenant1"
+    save_payloads: true
+    topics: ["Topic1", "Topic2"]
+database:
+  sqlite:
+    enabled: true
+    datasource: "test.db"
+    auto_migrate: true
+  postgres:
+    enabled: false
+    host: "localhost"
+    user: "postgres"
+    password: "password"
+    dbname: "testdb"
+    sslmode: false
+    auto_migrate: false
+server:
+  port: 8080
+  tls_enabled: false

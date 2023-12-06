@@ -2,19 +2,21 @@ package api
 
 import (
 	"fmt"
-	"github.com/zcubbs/mq-watch/cmd/server/logger"
 	"net/http"
 	"sort"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/zcubbs/mq-watch/cmd/server/db"
-	"gorm.io/gorm"
 )
 
-var log = logger.L()
+// HealthHandler returns a simple "OK" string to indicate the server is running.
+func healthHandler(c *fiber.Ctx) error {
+	return c.SendString("OK")
+}
 
-func MessageHandler(conn *gorm.DB, c *fiber.Ctx) error {
+// messageHandler retrieves the total messages count for a date range and optional tenant filter.
+func messageHandler(store db.Store, c *fiber.Ctx) error {
 	// Parsing dates from the request parameters
 	startDateStr := c.Query("start_datetime")
 	endDateStr := c.Query("end_datetime")
@@ -30,16 +32,14 @@ func MessageHandler(conn *gorm.DB, c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid end_date format"})
 	}
 
-	log.Info("Getting total messages", "start_date", startDate, "end_date", endDate)
-
 	// Using the functions to get the data
-	totalMessages, err := db.GetTotalMessages(conn, startDate, endDate)
+	totalMessages, err := store.GetTotalMessages(startDate, endDate)
 	if err != nil {
 		log.Error("Error getting total messages", "error", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	dailyMessagesPerTenant, err := db.GetDailyMessagesPerTenant(conn, startDate, endDate)
+	dailyMessagesPerTenant, err := store.GetDailyMessagesPerTenant(startDate, endDate)
 	if err != nil {
 		log.Error("Error getting daily messages per tenant", "error", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -51,7 +51,8 @@ func MessageHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	})
 }
 
-func TotalMessagesPerDayHandler(conn *gorm.DB, c *fiber.Ctx) error {
+// totalMessagesPerDayHandler retrieves the total messages count per day for a date range.
+func totalMessagesPerDayHandler(store db.Store, c *fiber.Ctx) error {
 	// Parsing dates from the request parameters
 	startDateStr := c.Query("start_date")
 	endDateStr := c.Query("end_date")
@@ -68,7 +69,7 @@ func TotalMessagesPerDayHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	}
 
 	// Using the function to get the data
-	messagesTotalPerDay, err := db.GetMessagesTotalPerDay(conn, startDate, endDate)
+	messagesTotalPerDay, err := store.GetMessagesTotalPerDay(startDate, endDate)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -101,8 +102,8 @@ func TotalMessagesPerDayHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(totals)
 }
 
-// GetTopTenantsHandler retrieves the top tenants based on message count.
-func GetTopTenantsHandler(conn *gorm.DB, c *fiber.Ctx) error {
+// getTopTenantsHandler retrieves the top tenants based on message count.
+func getTopTenantsHandler(store db.Store, c *fiber.Ctx) error {
 	// Parsing dates from the request parameters
 	startDateStr := c.Query("start_date")
 	endDateStr := c.Query("end_date")
@@ -119,7 +120,7 @@ func GetTopTenantsHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	}
 
 	// Use a database function to get top tenants
-	topTenants, err := db.GetTopTenants(conn, startDate, endDate)
+	topTenants, err := store.GetTopTenants(startDate, endDate)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -127,8 +128,8 @@ func GetTopTenantsHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(topTenants)
 }
 
-// GetMessageStatsHandler retrieves the total messages count for a date range and optional tenant filter.
-func GetMessageStatsHandler(conn *gorm.DB, c *fiber.Ctx) error {
+// getMessageStatsHandler retrieves the total messages count for a date range and optional tenant filter.
+func getMessageStatsHandler(store db.Store, c *fiber.Ctx) error {
 	// Parsing dates from the request parameters
 	startDateStr := c.Query("start_date")
 	endDateStr := c.Query("end_date")
@@ -150,10 +151,10 @@ func GetMessageStatsHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	var totalMessages int64
 	if tenant != "" {
 		// Fetch total messages for a specific tenant within the date range
-		totalMessages, err = db.GetMessagesPerTenant(conn, tenant, startDate, endDate)
+		totalMessages, err = store.GetMessagesPerTenant(tenant, startDate, endDate)
 	} else {
 		// Fetch total messages across all tenants within the date range
-		totalMessages, err = db.GetTotalMessages(conn, startDate, endDate)
+		totalMessages, err = store.GetTotalMessages(startDate, endDate)
 	}
 
 	if err != nil {
@@ -163,25 +164,26 @@ func GetMessageStatsHandler(conn *gorm.DB, c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(fiber.Map{"total_messages": totalMessages})
 }
 
-type SaveMessageRequest struct {
+type saveMessageRequest struct {
 	Tenant    string `json:"tenant"`
 	Topic     string `json:"topic"`
 	Payload   string `json:"payload"`
 	CreatedAt string `json:"created_at"`
 }
 
-type SaveMessagesRequest struct {
-	Messages []SaveMessageRequest `json:"messages"`
+type saveMessagesRequest struct {
+	Messages []saveMessageRequest `json:"messages"`
 }
 
-func SaveMessagesHandler(conn *gorm.DB, c *fiber.Ctx) error {
-	var req SaveMessagesRequest
+// saveMessagesHandler saves messages to the database.
+func saveMessagesHandler(store db.Store, c *fiber.Ctx) error {
+	var req saveMessagesRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request format"})
 	}
 
 	for _, msg := range req.Messages {
-		if err := db.SaveMessage(conn, msg.Tenant, msg.Topic, msg.Payload, msg.CreatedAt); err != nil {
+		if err := store.SaveMessage(msg.Tenant, msg.Topic, msg.Payload, msg.CreatedAt); err != nil {
 			log.Error("Error saving message", "tenant", msg.Tenant, "topic", msg.Topic, "error", err)
 			return c.Status(http.StatusInternalServerError).JSON(
 				fiber.Map{"error": fmt.Sprintf("Error saving message: %v", err)},
