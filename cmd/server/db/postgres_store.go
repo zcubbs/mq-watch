@@ -85,11 +85,7 @@ func (s *PostgresStore) GetMessagesTotalPerDay(startDate time.Time, endDate time
 }
 
 func (s *PostgresStore) GetTopTenants(startDate time.Time, endDate time.Time) ([]TopTenant, error) {
-	type result struct {
-		Tenant       string
-		MessageCount int64
-	}
-	var results []result
+	var results []TopTenant
 
 	err := s.db.Model(&models.Message{}).
 		Where("created_at BETWEEN ? AND ?", startDate, endDate).
@@ -103,15 +99,7 @@ func (s *PostgresStore) GetTopTenants(startDate time.Time, endDate time.Time) ([
 		return nil, err
 	}
 
-	var topTenants []TopTenant
-	for _, r := range results {
-		topTenants = append(topTenants, TopTenant{
-			Tenant:       r.Tenant,
-			MessageCount: r.MessageCount,
-		})
-	}
-
-	return topTenants, nil
+	return results, nil
 }
 
 func (s *PostgresStore) GetMessagesPerTenant(tenant string, startDate time.Time, endDate time.Time) (int64, error) {

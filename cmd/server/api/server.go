@@ -36,6 +36,7 @@ func initApp() *fiber.App {
 
 func (s *Server) Start() {
 	s.mountApiRoutes()
+	s.mountStaticRoutes()
 
 	// Run the server
 	log.Info("Starting server", "port", s.cfg.Port)
